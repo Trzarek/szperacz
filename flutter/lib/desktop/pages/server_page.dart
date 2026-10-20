@@ -267,10 +267,7 @@ class ConnectionManagerState extends State<ConnectionManager>
                                     mask: false,
                                   ))),
                   ]);
-                  return Container(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: row,
-                  );
+                  return SzperaczTlo(child: row); // Szperacz: tło butelki (okno 3)
                 },
               ),
             ),
@@ -363,7 +360,9 @@ class ConnectionManagerState extends State<ConnectionManager>
 
 Widget buildConnectionCard(Client client) {
   return Consumer<ServerModel>(
-    builder: (context, value, child) => Column(
+    builder: (context, value, child) => SzperaczMalaKarta(
+    padding: EdgeInsets.zero,
+    child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       key: ValueKey(client.id),
@@ -383,6 +382,7 @@ Widget buildConnectionCard(Client client) {
         )
       ],
     ).paddingSymmetric(vertical: 4.0, horizontal: 8.0),
+  ),
   );
 }
 
@@ -462,11 +462,9 @@ class _CmHeaderState extends State<_CmHeader>
         gradient: LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [
-            Color(0xff00bfe1),
-            Color(0xff0071ff),
-          ],
+          colors: szperaczNaglowekKolory, // Szperacz: czerwona wstęga zamiast niebieskiej
         ),
+        border: Border.all(color: szperaczZloto, width: 2),
       ),
       margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
       padding: EdgeInsets.only(

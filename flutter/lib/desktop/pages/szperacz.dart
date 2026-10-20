@@ -267,6 +267,212 @@ class SzperaczWybor extends StatelessWidget {
   }
 }
 
+/// Mała etykieta: kremowa karta ze złotą ramką (okna 3 i 4 — „jak 1 i 2, ale mniejsze”, 119.x).
+class SzperaczMalaKarta extends StatelessWidget {
+  final Widget child;
+  final EdgeInsets padding;
+  const SzperaczMalaKarta(
+      {Key? key, required this.child, this.padding = const EdgeInsets.all(10)})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: _Kolory.krem,
+        border: Border.all(color: _Kolory.zloto, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          border: Border.all(color: _Kolory.zlotoCiemne, width: 1),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Theme(
+          data: MyTheme.lightTheme,
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(color: _Kolory.tusz),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Zielone tło jak butelka, bez centrowania — do okien wypełniających cały obszar.
+class SzperaczTlo extends StatelessWidget {
+  final Widget child;
+  const SzperaczTlo({Key? key, required this.child}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            _Kolory.butelkaCiemna,
+            _Kolory.butelka,
+            _Kolory.butelkaJasna,
+            _Kolory.refleks,
+            _Kolory.butelkaJasna,
+            _Kolory.butelka,
+            _Kolory.butelkaCiemna,
+          ],
+          stops: [0.0, 0.22, 0.40, 0.46, 0.52, 0.75, 1.0],
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Kolory nagłówka okienka połączenia (zamiast niebieskiego gradientu RustDesk).
+const szperaczNaglowekKolory = [_Kolory.czerwien, Color(0xFF7A1414)];
+const szperaczZloto = _Kolory.zloto;
+
+/// Panel operatora: „Łączę się z kimś” — mniejsza etykieta (okno 4).
+class SzperaczOperator extends StatefulWidget {
+  final Widget listaKomputerow;
+  const SzperaczOperator({Key? key, required this.listaKomputerow})
+      : super(key: key);
+
+  @override
+  State<SzperaczOperator> createState() => _SzperaczOperatorState();
+}
+
+class _SzperaczOperatorState extends State<SzperaczOperator> {
+  final _numer = TextEditingController();
+
+  @override
+  void dispose() {
+    _numer.dispose();
+    super.dispose();
+  }
+
+  void _polacz() {
+    final id = _numer.text.replaceAll(' ', '').trim();
+    if (id.isEmpty) {
+      showToast('Wpisz numer klienta');
+      return;
+    }
+    connect(context, id);
+  }
+
+  Widget _malyKupon(TextEditingController k) => ValueListenableBuilder<TextEditingValue>(
+        valueListenable: k,
+        builder: (context, w, _) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+          decoration: BoxDecoration(
+            color: _Kolory.kupon,
+            border: Border.all(color: _Kolory.czerwien, width: 1.5),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: SelectableText(
+            w.text.isEmpty ? '...' : w.text,
+            style: const TextStyle(
+                fontFamily: 'SzperaczMono',
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                letterSpacing: 2,
+                color: _Kolory.tusz),
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final model = gFFI.serverModel;
+    return SzperaczTlo(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SzperaczMalaKarta(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Row(
+                children: [
+                  const Text('SZPERACZ',
+                      style: TextStyle(
+                          fontFamily: 'SzperaczSlab',
+                          fontSize: 18,
+                          letterSpacing: 2,
+                          color: _Kolory.czerwien)),
+                  const SizedBox(width: 14),
+                  _maly('MÓJ NUMER'),
+                  const SizedBox(width: 6),
+                  _malyKupon(model.serverId),
+                  const SizedBox(width: 10),
+                  _maly('HASŁO'),
+                  const SizedBox(width: 6),
+                  _malyKupon(model.serverPasswd),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => szperaczTryb.value = null,
+                    child: _maly('◀ WYBÓR'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            SzperaczMalaKarta(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              child: Row(
+                children: [
+                  _maly('NUMER KLIENTA'),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _numer,
+                      onSubmitted: (_) => _polacz(),
+                      style: const TextStyle(
+                          fontFamily: 'SzperaczMono',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                          letterSpacing: 3,
+                          color: _Kolory.tusz),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        filled: true,
+                        fillColor: _Kolory.kupon,
+                        hintText: '123 456 789',
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: _Kolory.czerwien, width: 1.5),
+                            borderRadius: BorderRadius.circular(6)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: _Kolory.czerwien, width: 2.5),
+                            borderRadius: BorderRadius.circular(6)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 150,
+                    child: szperaczKlawisz(
+                        tekst: 'POŁĄCZ', zielony: true, onTap: _polacz),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: SzperaczMalaKarta(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                child: widget.listaKomputerow,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Kupon z wartością (ID albo hasło) czytaną na żywo z kontrolera RustDesk.
 Widget _kupon(TextEditingController kontroler,
     {required double rozmiar, required bool przerywana, bool szeroki = true}) {
