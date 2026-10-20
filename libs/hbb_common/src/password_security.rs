@@ -40,14 +40,8 @@ pub fn temporary_password() -> String {
 }
 
 fn verification_method() -> VerificationMethod {
-    let method = Config::get_option("verification-method");
-    if method == "use-temporary-password" {
-        VerificationMethod::OnlyUseTemporaryPassword
-    } else if method == "use-permanent-password" {
-        VerificationMethod::OnlyUsePermanentPassword
-    } else {
-        VerificationMethod::UseBothPasswords // default
-    }
+    // Szperacz (139.1): kod jednorazowy zawsze włączony — ustawienie "verification-method" jest ignorowane.
+    VerificationMethod::UseBothPasswords
 }
 
 pub fn temporary_password_length() -> usize {
@@ -75,14 +69,9 @@ pub fn has_valid_password() -> bool {
 }
 
 pub fn approve_mode() -> ApproveMode {
-    let mode = Config::get_option("approve-mode");
-    if mode == "password" {
-        ApproveMode::Password
-    } else if mode == "click" {
-        ApproveMode::Click
-    } else {
-        ApproveMode::Both
-    }
+    // Szperacz (139.1): tryb zablokowany — zawsze kod od klienta + kliknięcie AKCEPTUJ
+    // (logika w src/server/connection.rs). Ustawienie "approve-mode" jest ignorowane.
+    ApproveMode::Both
 }
 
 pub fn hide_cm() -> bool {
