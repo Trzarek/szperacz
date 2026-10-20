@@ -25,6 +25,15 @@ Pierwsza budowa trwa około godziny, kolejne są szybsze dzięki pamięci podrę
 Numer wersji: `szperaczWersja` w `flutter/lib/desktop/pages/szperacz.dart`. Numer budowy, datę i skrót commita
 wpisuje workflow (krok „Wpisz numer budowy”); widać je w stopce okien programu i w nazwie wydania „najnowsza”.
 
+### 0.10.0 (20.10.2026) — stali klienci
+
+1. Hasło stałe ustawiane przez klienta w jego oknie Szperacza (min. 10 znaków, można usunąć).
+2. Połączenie hasłem stałym bez kodu i bez klikania AKCEPTUJ — działa też, gdy nikogo nie ma przy komputerze;
+   klient zawsze widzi okienko połączenia z przyciskiem ROZŁĄCZ.
+3. Kod jednorazowy dalej wymaga kliknięcia AKCEPTUJ.
+4. Przycisk „ZAINSTALUJ NA STAŁE” w oknie klienta (Szperacz startuje z Windows jako usługa).
+5. Hasło stałe NIE jest zapisywane w liście komputerów serwisanta — wpisuje się je przy każdym połączeniu.
+
 ### 0.9.0 (20.10.2026) — pierwsza wersja testowa
 
 1. Jeden program z wyborem trybu: „Ktoś łączy się ze mną” (klient) / „Łączę się z kimś” (serwisant).

@@ -3031,12 +3031,25 @@ impl Connection {
                         .await;
                 } else {
                     self.update_failure_with_scope(failure, true, 0, FailureScope::Default);
-                    // Szperacz (130.1): poprawny kod to dopiero pierwszy krok — teraz klient
-                    // dostaje okienko AKCEPTUJ / ODRZUĆ, a serwisant czeka na jego decyzję
-                    // (zatwierdzenie przychodzi jako ipc::Data::Authorize z okienka).
-                    self.try_start_cm(lr.my_id, lr.my_name, false);
-                    self.send_login_error(crate::client::LOGIN_MSG_NO_PASSWORD_ACCESS)
-                        .await;
+                    if matches!(
+                        self.conn_audit_primary_auth,
+                        ConnAuditPrimaryAuth::PermanentPassword
+                    ) {
+                        // Szperacz (146.1): stały klient — hasło stałe ustawione przez klienta
+                        // otwiera dostęp bez kliknięcia (także gdy nikogo nie ma przy komputerze).
+                        // Klient i tak widzi okienko połączenia z przyciskiem ROZŁĄCZ.
+                        if !self.send_logon_response_and_keep_alive().await {
+                            return false;
+                        }
+                        self.try_start_cm(lr.my_id, lr.my_name, self.authorized);
+                    } else {
+                        // Szperacz (130.1): poprawny kod jednorazowy to dopiero pierwszy krok —
+                        // teraz klient dostaje okienko AKCEPTUJ / ODRZUĆ, a serwisant czeka
+                        // (zatwierdzenie przychodzi jako ipc::Data::Authorize z okienka).
+                        self.try_start_cm(lr.my_id, lr.my_name, false);
+                        self.send_login_error(crate::client::LOGIN_MSG_NO_PASSWORD_ACCESS)
+                            .await;
+                    }
                 }
             }
         } else if let Some(message::Union::Auth2fa(tfa)) = msg.union {

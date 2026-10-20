@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/models/platform_model.dart';
+import 'package:flutter_hbb/utils/multi_window_manager.dart';
 import 'package:get/get.dart';
 
 /// Wybrany tryb: null = ekran wyboru, 'klient' = ktoś łączy się ze mną, 'operator' = łączę się z kimś.
@@ -11,7 +13,7 @@ final szperaczTryb = RxnString();
 
 /// Wersja Szperacza (141.x). SZPERACZ_BUDOWA podmienia workflow GitHub Actions
 /// na numer budowy, datę i skrót commita; przy budowie lokalnej zostaje „lokalna”.
-const szperaczWersja = '0.9.0';
+const szperaczWersja = '0.10.0';
 const szperaczBudowa = 'SZPERACZ_BUDOWA';
 
 /// Napis z wersją do stopek okien.
@@ -676,12 +678,34 @@ Widget _kupon(
 
 /// Okno klienta: numer ID i hasło jednorazowe do podyktowania serwisantowi.
 /// Akceptacja połączenia odbywa się w okienku, które pojawia się przy połączeniu.
-class SzperaczKlient extends StatelessWidget {
+class SzperaczKlient extends StatefulWidget {
   const SzperaczKlient({Key? key}) : super(key: key);
+
+  @override
+  State<SzperaczKlient> createState() => _SzperaczKlientState();
+}
+
+class _SzperaczKlientState extends State<SzperaczKlient> {
+  bool _staly = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _odswiez();
+  }
+
+  Future<void> _odswiez() async {
+    final ustawione =
+        (await bind.mainGetCommon(key: 'local-permanent-password-set')) ==
+        'true';
+    if (mounted) setState(() => _staly = ustawione);
+  }
 
   @override
   Widget build(BuildContext context) {
     final model = gFFI.serverModel;
+    final moznaInstalowac =
+        isWindows && !bind.isDisableInstallation() && !bind.mainIsInstalled();
     return _Butelka(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -707,6 +731,35 @@ class SzperaczKlient extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+          // Szperacz (146.x): stały klient — hasło stałe i instalacja na stałe.
+          _maly(_staly ? 'STAŁY DOSTĘP: WŁĄCZONY' : 'STAŁY DOSTĘP: WYŁĄCZONY'),
+          Row(
+            children: [
+              Expanded(
+                child: szperaczKlawisz(
+                  tekst: _staly ? 'ZMIEŃ HASŁO STAŁE' : 'HASŁO STAŁE',
+                  zielony: true,
+                  zloty: true,
+                  onTap: () => szperaczUstawHasloStale(
+                    jestUstawione: _staly,
+                    poZmianie: _odswiez,
+                  ),
+                ),
+              ),
+              if (moznaInstalowac)
+                Expanded(
+                  child: szperaczKlawisz(
+                    tekst: 'ZAINSTALUJ NA STAŁE',
+                    zielony: true,
+                    onTap: () async {
+                      await rustDeskWinManager.closeAllSubWindows();
+                      bind.mainGotoInstall();
+                    },
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
           const Text(
             'jasna, pełna, szybka pomoc',
             style: TextStyle(
@@ -725,4 +778,139 @@ class SzperaczKlient extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Ustawienie / usunięcie hasła stałego przez klienta (146.x): min. 10 znaków, dwa razy to samo.
+/// Hasło stałe otwiera dostęp bez kliknięcia AKCEPTUJ (src/server/connection.rs).
+void szperaczUstawHasloStale({
+  required bool jestUstawione,
+  required VoidCallback poZmianie,
+}) {
+  final p0 = TextEditingController();
+  final p1 = TextEditingController();
+  var blad = '';
+  gFFI.dialogManager.show((setState, close, context) {
+    Future<void> zapisz(String haslo) async {
+      final ok = await bind.mainSetPermanentPasswordWithResult(password: haslo);
+      if (!ok) {
+        setState(() => blad = 'Nie udało się zapisać hasła.');
+        return;
+      }
+      poZmianie();
+      close();
+      showToast(
+        haslo.isEmpty ? 'Stały dostęp wyłączony' : 'Hasło stałe zapisane',
+      );
+    }
+
+    void ustaw() {
+      final haslo = p0.text.trim();
+      if (haslo.length < 10) {
+        setState(() => blad = 'Hasło musi mieć co najmniej 10 znaków.');
+        return;
+      }
+      if (p1.text.trim() != haslo) {
+        setState(() => blad = 'Hasła nie są takie same.');
+        return;
+      }
+      zapisz(haslo);
+    }
+
+    InputDecoration pole(String podpowiedz) => InputDecoration(
+      isDense: true,
+      filled: true,
+      fillColor: _Kolory.kupon,
+      hintText: podpowiedz,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: _Kolory.czerwien, width: 1.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: _Kolory.czerwien, width: 2.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+    const styl = TextStyle(
+      fontFamily: 'SzperaczMono',
+      fontWeight: FontWeight.w700,
+      fontSize: 18,
+      letterSpacing: 2,
+      color: _Kolory.tusz,
+    );
+
+    return CustomAlertDialog(
+      title: szperaczTytulOkna('STAŁY DOSTĘP MINITEL'),
+      content: SzperaczMalaKarta(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Z hasłem stałym serwisant MINITEL może połączyć się z tym '
+              'komputerem bez kodu i bez klikania AKCEPTUJ. '
+              'Połączenie zawsze widać na ekranie.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'SzperaczSerif',
+                fontSize: 13,
+                color: _Kolory.tusz,
+              ),
+            ),
+            const SizedBox(height: 10),
+            _maly('NOWE HASŁO STAŁE (MIN. 10 ZNAKÓW)'),
+            const SizedBox(height: 4),
+            TextField(
+              controller: p0,
+              autofocus: true,
+              style: styl,
+              decoration: pole('hasło'),
+            ),
+            const SizedBox(height: 8),
+            _maly('POWTÓRZ HASŁO'),
+            const SizedBox(height: 4),
+            TextField(
+              controller: p1,
+              style: styl,
+              decoration: pole('hasło'),
+              onSubmitted: (_) => ustaw(),
+            ),
+            if (blad.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  blad,
+                  style: const TextStyle(
+                    color: _Kolory.czerwien,
+                    fontFamily: 'SzperaczSerif',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            if (jestUstawione) ...[
+              const SizedBox(height: 10),
+              szperaczKlawisz(
+                tekst: 'USUŃ STAŁY DOSTĘP',
+                zielony: false,
+                onTap: () => zapisz(''),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        SizedBox(
+          width: 140,
+          child: szperaczKlawisz(tekst: 'ANULUJ', zielony: false, onTap: close),
+        ),
+        SizedBox(
+          width: 140,
+          child: szperaczKlawisz(tekst: 'ZAPISZ', zielony: true, onTap: ustaw),
+        ),
+      ],
+      onSubmit: ustaw,
+      onCancel: close,
+    );
+  });
 }
