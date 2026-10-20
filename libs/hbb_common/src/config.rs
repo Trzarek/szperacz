@@ -114,7 +114,7 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["hg409rdx620.sn.mynetname.net"]; // Szperacz: serwer MINITEL na QNAP
+pub const RENDEZVOUS_SERVERS: &[&str] = &["szperacz-server.minitel24.pl"]; // Szperacz: serwer MINITEL na QNAP (DNS w OVH → 77.252.227.134)
 pub const RS_PUB_KEY: &str = "eR+vpIsBdBNo9I8YqLJxASMhxgtgO6jEWlLikTE7KTA="; // Szperacz: klucz serwera QNAP
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
