@@ -12,6 +12,11 @@ on:
 permissions:
   contents: write
 
+# Nowsza zmiana anuluje trwającą budowę, żeby starsza wersja nie nadpisała wydania „najnowsza”.
+concurrency:
+  group: szperacz-windows
+  cancel-in-progress: true
+
 env:
   SCITER_RUST_VERSION: "1.75"
   LLVM_VERSION: "15.0.6"
