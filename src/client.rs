@@ -3313,6 +3313,9 @@ impl LoginConfigHandler {
                 option.disable_keyboard = f(true);
                 option.disable_clipboard = f(true);
                 option.show_remote_cursor = f(true);
+                // Szperacz (134.2): po włączeniu „Tylko podgląd” od razu pokazuj klientowi kursor serwisanta.
+                config.show_my_cursor.v = true;
+                option.show_my_cursor = BoolOption::Yes.into();
                 option.enable_file_transfer = f(false);
                 option.lock_after_session_end = f(false);
             } else {
@@ -3426,7 +3429,9 @@ impl LoginConfigHandler {
         if view_only || self.get_toggle_option("show-remote-cursor") {
             msg.show_remote_cursor = BoolOption::Yes.into();
         }
-        if view_only && self.get_toggle_option("show-my-cursor") {
+        // Szperacz (134.2): w trybie „Tylko podgląd” klient zawsze widzi kursor serwisanta,
+        // żeby można było mu coś pokazać bez przejmowania sterowania.
+        if view_only {
             msg.show_my_cursor = BoolOption::Yes.into();
         }
         if self.get_toggle_option("follow-remote-cursor") {
