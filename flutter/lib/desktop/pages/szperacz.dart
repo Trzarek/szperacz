@@ -13,7 +13,7 @@ final szperaczTryb = RxnString();
 
 /// Wersja Szperacza (141.x). SZPERACZ_BUDOWA podmienia workflow GitHub Actions
 /// na numer budowy, datę i skrót commita; przy budowie lokalnej zostaje „lokalna”.
-const szperaczWersja = '0.10.1';
+const szperaczWersja = '0.10.2';
 const szperaczBudowa = 'SZPERACZ_BUDOWA';
 
 /// Napis z wersją do stopek okien.

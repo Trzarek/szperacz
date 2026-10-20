@@ -5,7 +5,7 @@ Szperacz to zmodyfikowana wersja [RustDesk](https://github.com/rustdesk/rustdesk
 
 ## Zmiany względem RustDesk 1.5.0
 
-1. Wbudowany serwer MINITEL: `hg409rdx620.sn.mynetname.net` i jego klucz publiczny
+1. Wbudowany serwer MINITEL: `szperacz-server.minitel24.pl` i jego klucz publiczny
    (`libs/hbb_common/src/config.rs`, stałe `RENDEZVOUS_SERVERS` i `RS_PUB_KEY`).
 2. Nazwa aplikacji „Szperacz” (`APP_NAME`), opis pliku i producent w `flutter/windows/runner/Runner.rc`.
 3. Ikony: pieczątka MINITEL (`res/*.png`, `res/*.ico`, `flutter/windows/runner/resources/app_icon.ico`,
@@ -24,6 +24,12 @@ Pierwsza budowa trwa około godziny, kolejne są szybsze dzięki pamięci podrę
 
 Numer wersji: `szperaczWersja` w `flutter/lib/desktop/pages/szperacz.dart`. Numer budowy, datę i skrót commita
 wpisuje workflow (krok „Wpisz numer budowy”); widać je w stopce okien programu i w nazwie wydania „najnowsza”.
+
+### 0.10.2 (20.10.2026) — własna domena
+
+1. Adres serwera: szperacz-server.minitel24.pl (domena w OVH) zamiast adresu DDNS huba.
+   Przy zmianie łącza lub przeniesieniu serwera wystarczy zmienić rekord DNS.
+2. Strona pobierania: https://szperacz.minitel24.pl
 
 ### 0.10.1 (20.10.2026) — poprawka po teście 2
 
