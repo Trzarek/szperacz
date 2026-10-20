@@ -108,16 +108,35 @@ jobs:
           runner_res=$(find . -name "Runner.res")
           if [ -n "$runner_res" ]; then cp $runner_res ./libs/portable/Runner.res; fi
 
+      # Rozpakowana wersja (folder) na wypadek, gdyby pakowanie do jednego pliku się nie udało.
+      - name: Upload Szperacz folder
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Szperacz-windows-x64-folder
+          path: rustdesk
+
       - name: Build self-extracted Szperacz.exe
         shell: bash
         run: |
+          set -o pipefail
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
+          # Błąd trafia też do adnotacji (widocznych bez logowania), żeby łatwo go odczytać.
+          if ! python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe > ../../pakowanie.log 2>&1; then
+            tail -n 40 ../../pakowanie.log
+            echo "::error title=Pakowanie Szperacz.exe::$(grep -iE 'error|failed|cannot|not found' ../../pakowanie.log | tail -n 12 | tr '\n' ' ' | cut -c1-3000)"
+            exit 1
+          fi
+          tail -n 5 ../../pakowanie.log
           popd
           mkdir -p ./Wynik
-          mv ./target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz.exe
+          ls -la ./target/release/ ./libs/portable/target/release/ 2>/dev/null | grep -i packer || true
+          if [ -f ./target/release/rustdesk-portable-packer.exe ]; then
+            mv ./target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz.exe
+          else
+            mv ./libs/portable/target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz.exe
+          fi
 
       - name: Upload Szperacz.exe
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
