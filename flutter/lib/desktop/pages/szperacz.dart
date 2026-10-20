@@ -9,6 +9,32 @@ import 'package:get/get.dart';
 /// Wybrany tryb: null = ekran wyboru, 'klient' = ktoś łączy się ze mną, 'operator' = łączę się z kimś.
 final szperaczTryb = RxnString();
 
+/// Wersja Szperacza (141.x). SZPERACZ_BUDOWA podmienia workflow GitHub Actions
+/// na numer budowy, datę i skrót commita; przy budowie lokalnej zostaje „lokalna”.
+const szperaczWersja = '0.9.0';
+const szperaczBudowa = 'SZPERACZ_BUDOWA';
+
+/// Napis z wersją do stopek okien.
+String get szperaczOpisWersji =>
+    szperaczBudowa ==
+        'SZPERACZ_'
+            'BUDOWA'
+    ? 'wersja $szperaczWersja · budowa lokalna'
+    : 'wersja $szperaczWersja · budowa $szperaczBudowa';
+
+Widget _wersja() => Padding(
+  padding: const EdgeInsets.only(top: 6),
+  child: Text(
+    szperaczOpisWersji,
+    textAlign: TextAlign.center,
+    style: const TextStyle(
+      fontFamily: 'SzperaczSerif',
+      fontSize: 11,
+      color: Color(0xFF6B5208),
+    ),
+  ),
+);
+
 class _Kolory {
   static const butelkaCiemna = Color(0xFF04190F);
   static const butelka = Color(0xFF0B3A24);
@@ -359,6 +385,7 @@ class SzperaczWybor extends StatelessWidget {
               color: Color(0xFF0E4A2E),
             ),
           ),
+          _wersja(),
         ],
       ),
     );
@@ -515,6 +542,15 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                   const SizedBox(width: 6),
                   _malyKupon(model.serverPasswd),
                   const Spacer(),
+                  Text(
+                    szperaczOpisWersji,
+                    style: const TextStyle(
+                      fontFamily: 'SzperaczSerif',
+                      fontSize: 11,
+                      color: Color(0xFF6B5208),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => szperaczTryb.value = null,
                     child: _maly('◀ WYBÓR'),
@@ -684,6 +720,7 @@ class SzperaczKlient extends StatelessWidget {
             onPressed: () => szperaczTryb.value = null,
             child: _maly('◀ WRÓĆ DO WYBORU'),
           ),
+          _wersja(),
         ],
       ),
     );

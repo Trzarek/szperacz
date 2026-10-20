@@ -19,3 +19,18 @@ Szperacz to zmodyfikowana wersja [RustDesk](https://github.com/rustdesk/rustdesk
 
 GitHub → Actions → „Szperacz - budowa Windows x64” → Run workflow (uruchamia się też po każdym push do `main`).
 Pierwsza budowa trwa około godziny, kolejne są szybsze dzięki pamięci podręcznej.
+
+## Historia wersji
+
+Numer wersji: `szperaczWersja` w `flutter/lib/desktop/pages/szperacz.dart`. Numer budowy, datę i skrót commita
+wpisuje workflow (krok „Wpisz numer budowy”); widać je w stopce okien programu i w nazwie wydania „najnowsza”.
+
+### 0.9.0 (20.10.2026) — pierwsza wersja testowa
+
+1. Jeden program z wyborem trybu: „Ktoś łączy się ze mną” (klient) / „Łączę się z kimś” (serwisant).
+2. Wygląd starej etykiety piwa we wszystkich oknach, w tym w okienku połączenia i okienku kodu.
+3. Połączenie wymaga kodu jednorazowego od klienta i kliknięcia AKCEPTUJ (tryb zablokowany w ustawieniach).
+4. Nowy kod po każdej sesji, numer ID na stałe.
+5. Kod w okienku serwisanta zawsze odkryty, bez „Zapamiętaj hasło”.
+6. W trybie „Tylko podgląd” klient widzi kursor serwisanta.
+7. Przycisk „AKCEPTUJ JAKO ADMINISTRATOR” (dostęp do okien z uprawnieniami).
