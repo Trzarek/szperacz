@@ -76,52 +76,54 @@ class _Butelka extends StatelessWidget {
 }
 
 Widget _maly(String tekst) => Text(
-      tekst,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontFamily: 'SzperaczSerif',
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 2,
-        color: _Kolory.napisZloty,
-      ),
-    );
+  tekst,
+  textAlign: TextAlign.center,
+  style: const TextStyle(
+    fontFamily: 'SzperaczSerif',
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 2,
+    color: _Kolory.napisZloty,
+  ),
+);
 
 Widget _naglowek() => Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _maly('★ MINITEL · WROCŁAW ★'),
-        const SizedBox(height: 2),
-        const Text(
-          'SZPERACZ',
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    _maly('★ MINITEL · WROCŁAW ★'),
+    const SizedBox(height: 2),
+    const Text(
+      'SZPERACZ',
+      style: TextStyle(
+        fontFamily: 'SzperaczSlab',
+        fontSize: 28,
+        letterSpacing: 3,
+        color: _Kolory.czerwien,
+      ),
+    ),
+    const SizedBox(height: 6),
+    ClipPath(
+      clipper: _Wstega(),
+      child: Container(
+        color: _Kolory.czerwien,
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
+        child: const Text(
+          'POMOC ZDALNA',
           style: TextStyle(
             fontFamily: 'SzperaczSlab',
-            fontSize: 28,
-            letterSpacing: 3,
-            color: _Kolory.czerwien,
+            fontSize: 16,
+            letterSpacing: 4,
+            color: Colors.white,
+            shadows: [
+              Shadow(offset: Offset(1, 1), color: _Kolory.czerwienCiemna),
+            ],
           ),
         ),
-        const SizedBox(height: 6),
-        ClipPath(
-          clipper: _Wstega(),
-          child: Container(
-            color: _Kolory.czerwien,
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
-            child: const Text(
-              'POMOC ZDALNA',
-              style: TextStyle(
-                fontFamily: 'SzperaczSlab',
-                fontSize: 16,
-                letterSpacing: 4,
-                color: Colors.white,
-                shadows: [Shadow(offset: Offset(1, 1), color: _Kolory.czerwienCiemna)],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
-    );
+      ),
+    ),
+    const SizedBox(height: 10),
+  ],
+);
 
 /// Kształt wstęgi z wciętymi końcami.
 class _Wstega extends CustomClipper<Path> {
@@ -147,13 +149,14 @@ class _Klawisz extends StatefulWidget {
   final Color cien;
   final VoidCallback onTap;
   final double wysokosc;
-  const _Klawisz(
-      {required this.tekst,
-      required this.ikona,
-      required this.kolor,
-      required this.cien,
-      required this.onTap,
-      this.wysokosc = 56});
+  const _Klawisz({
+    required this.tekst,
+    required this.ikona,
+    required this.kolor,
+    required this.cien,
+    required this.onTap,
+    this.wysokosc = 56,
+  });
 
   @override
   State<_Klawisz> createState() => _KlawiszState();
@@ -180,25 +183,33 @@ class _KlawiszState extends State<_Klawisz> {
                 : widget.kolor,
             border: Border.all(color: _Kolory.zloto, width: 3),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: [BoxShadow(color: widget.cien, offset: const Offset(0, 5))],
+            boxShadow: [
+              BoxShadow(color: widget.cien, offset: const Offset(0, 5)),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(widget.ikona, color: Colors.white, size: 20),
               const SizedBox(width: 8),
+              // Napis zawsze w jednej linii — w wąskim okienku zmniejsza się zamiast łamać (130.2).
               Flexible(
-                child: Text(
-                  widget.tekst,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'SzperaczSlab',
-                    fontSize: 16,
-                    letterSpacing: 1,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(offset: Offset(1, 2), color: Color(0x8C000000))
-                    ],
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.tekst,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(
+                      fontFamily: 'SzperaczSlab',
+                      fontSize: 15,
+                      letterSpacing: 0.5,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(offset: Offset(1, 2), color: Color(0x8C000000)),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -212,8 +223,11 @@ class _KlawiszState extends State<_Klawisz> {
 
 /// Przycisk w stylu etykiety dla okienka połączenia (server_page.dart, 114.1):
 /// zielony do akceptacji, czerwony do odrzucenia lub rozłączenia.
-Widget szperaczKlawisz(
-    {required String tekst, required bool zielony, required VoidCallback onTap}) {
+Widget szperaczKlawisz({
+  required String tekst,
+  required bool zielony,
+  required VoidCallback onTap,
+}) {
   return Padding(
     padding: const EdgeInsets.fromLTRB(4, 4, 4, 9),
     child: _Klawisz(
@@ -259,7 +273,10 @@ class SzperaczWybor extends StatelessWidget {
           const Text(
             'jasna, pełna, szybka pomoc',
             style: TextStyle(
-                fontFamily: 'SzperaczScript', fontSize: 16, color: Color(0xFF0E4A2E)),
+              fontFamily: 'SzperaczScript',
+              fontSize: 16,
+              color: Color(0xFF0E4A2E),
+            ),
           ),
         ],
       ),
@@ -271,9 +288,11 @@ class SzperaczWybor extends StatelessWidget {
 class SzperaczMalaKarta extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
-  const SzperaczMalaKarta(
-      {Key? key, required this.child, this.padding = const EdgeInsets.all(10)})
-      : super(key: key);
+  const SzperaczMalaKarta({
+    Key? key,
+    required this.child,
+    this.padding = const EdgeInsets.all(10),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -337,7 +356,7 @@ const szperaczZloto = _Kolory.zloto;
 class SzperaczOperator extends StatefulWidget {
   final Widget listaKomputerow;
   const SzperaczOperator({Key? key, required this.listaKomputerow})
-      : super(key: key);
+    : super(key: key);
 
   @override
   State<SzperaczOperator> createState() => _SzperaczOperatorState();
@@ -361,7 +380,8 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
     connect(context, id);
   }
 
-  Widget _malyKupon(TextEditingController k) => ValueListenableBuilder<TextEditingValue>(
+  Widget _malyKupon(TextEditingController k) =>
+      ValueListenableBuilder<TextEditingValue>(
         valueListenable: k,
         builder: (context, w, _) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
@@ -373,11 +393,12 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
           child: SelectableText(
             w.text.isEmpty ? '...' : w.text,
             style: const TextStyle(
-                fontFamily: 'SzperaczMono',
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
-                letterSpacing: 2,
-                color: _Kolory.tusz),
+              fontFamily: 'SzperaczMono',
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              letterSpacing: 2,
+              color: _Kolory.tusz,
+            ),
           ),
         ),
       );
@@ -395,12 +416,15 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               child: Row(
                 children: [
-                  const Text('SZPERACZ',
-                      style: TextStyle(
-                          fontFamily: 'SzperaczSlab',
-                          fontSize: 18,
-                          letterSpacing: 2,
-                          color: _Kolory.czerwien)),
+                  const Text(
+                    'SZPERACZ',
+                    style: TextStyle(
+                      fontFamily: 'SzperaczSlab',
+                      fontSize: 18,
+                      letterSpacing: 2,
+                      color: _Kolory.czerwien,
+                    ),
+                  ),
                   const SizedBox(width: 14),
                   _maly('MÓJ NUMER'),
                   const SizedBox(width: 6),
@@ -429,24 +453,35 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                       controller: _numer,
                       onSubmitted: (_) => _polacz(),
                       style: const TextStyle(
-                          fontFamily: 'SzperaczMono',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 20,
-                          letterSpacing: 3,
-                          color: _Kolory.tusz),
+                        fontFamily: 'SzperaczMono',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        letterSpacing: 3,
+                        color: _Kolory.tusz,
+                      ),
                       decoration: InputDecoration(
                         isDense: true,
                         filled: true,
                         fillColor: _Kolory.kupon,
                         hintText: '123 456 789',
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 10,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: _Kolory.czerwien, width: 1.5),
-                            borderRadius: BorderRadius.circular(6)),
+                          borderSide: const BorderSide(
+                            color: _Kolory.czerwien,
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                         focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: _Kolory.czerwien, width: 2.5),
-                            borderRadius: BorderRadius.circular(6)),
+                          borderSide: const BorderSide(
+                            color: _Kolory.czerwien,
+                            width: 2.5,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
                     ),
                   ),
@@ -454,7 +489,10 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                   SizedBox(
                     width: 150,
                     child: szperaczKlawisz(
-                        tekst: 'POŁĄCZ', zielony: true, onTap: _polacz),
+                      tekst: 'POŁĄCZ',
+                      zielony: true,
+                      onTap: _polacz,
+                    ),
                   ),
                 ],
               ),
@@ -474,8 +512,12 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
 }
 
 /// Kupon z wartością (ID albo hasło) czytaną na żywo z kontrolera RustDesk.
-Widget _kupon(TextEditingController kontroler,
-    {required double rozmiar, required bool przerywana, bool szeroki = true}) {
+Widget _kupon(
+  TextEditingController kontroler, {
+  required double rozmiar,
+  required bool przerywana,
+  bool szeroki = true,
+}) {
   return ValueListenableBuilder<TextEditingValue>(
     valueListenable: kontroler,
     builder: (context, wartosc, _) => GestureDetector(
@@ -486,11 +528,17 @@ Widget _kupon(TextEditingController kontroler,
       child: Container(
         width: szeroki ? double.infinity : null,
         margin: const EdgeInsets.only(top: 6, bottom: 8),
-        padding: EdgeInsets.symmetric(vertical: 6, horizontal: szeroki ? 0 : 18),
+        padding: EdgeInsets.symmetric(
+          vertical: 6,
+          horizontal: szeroki ? 0 : 18,
+        ),
         decoration: BoxDecoration(
           color: _Kolory.kupon,
           border: Border.all(
-              color: _Kolory.czerwien, width: 2, style: BorderStyle.solid),
+            color: _Kolory.czerwien,
+            width: 2,
+            style: BorderStyle.solid,
+          ),
           borderRadius: BorderRadius.circular(przerywana ? 8 : 6),
         ),
         child: SelectableText(
@@ -525,19 +573,30 @@ class SzperaczKlient extends StatelessWidget {
           _maly('TWÓJ NUMER — PODAJ GO SERWISANTOWI'),
           _kupon(model.serverId, rozmiar: 34, przerywana: true),
           _maly('HASŁO JEDNORAZOWE'),
-          _kupon(model.serverPasswd, rozmiar: 24, przerywana: false, szeroki: false),
+          _kupon(
+            model.serverPasswd,
+            rozmiar: 24,
+            przerywana: false,
+            szeroki: false,
+          ),
           const SizedBox(height: 6),
           const Text(
             'Gdy serwisant się połączy, pojawi się okienko —\nkliknij w nim AKCEPTUJ.',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontFamily: 'SzperaczSerif', fontSize: 14, color: _Kolory.tusz),
+              fontFamily: 'SzperaczSerif',
+              fontSize: 14,
+              color: _Kolory.tusz,
+            ),
           ),
           const SizedBox(height: 10),
           const Text(
             'jasna, pełna, szybka pomoc',
             style: TextStyle(
-                fontFamily: 'SzperaczScript', fontSize: 16, color: Color(0xFF0E4A2E)),
+              fontFamily: 'SzperaczScript',
+              fontSize: 16,
+              color: Color(0xFF0E4A2E),
+            ),
           ),
           const SizedBox(height: 6),
           TextButton(
@@ -549,4 +608,3 @@ class SzperaczKlient extends StatelessWidget {
     );
   }
 }
-

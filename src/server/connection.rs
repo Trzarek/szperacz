@@ -3015,14 +3015,10 @@ impl Connection {
                 }
                 self.try_start_cm(lr.my_id.clone(), lr.my_name.clone(), self.authorized);
             } else if lr.password.is_empty() {
-                #[cfg(not(any(target_os = "android", target_os = "ios")))]
-                if should_use_terminal_os_login_scope(self.terminal, &lr.os_login.username) {
-                    if let Some(keep_alive) = self.prepare_terminal_login_for_authorization().await
-                    {
-                        return keep_alive;
-                    }
-                }
-                self.try_start_cm(lr.my_id, lr.my_name, false);
+                // Szperacz (130.1): bez kodu klient nie dostaje okienka akceptacji —
+                // serwisant musi najpierw wpisać kod jednorazowy z ekranu klienta.
+                self.send_login_error(crate::client::LOGIN_MSG_PASSWORD_EMPTY)
+                    .await;
             } else {
                 let (failure, res) = self.check_failure(0).await;
                 if !res {
@@ -3033,13 +3029,14 @@ impl Connection {
                     self.check_update_temporary_password(false);
                     self.send_login_error(crate::client::LOGIN_MSG_PASSWORD_WRONG)
                         .await;
-                    self.try_start_cm(lr.my_id, lr.my_name, false);
                 } else {
                     self.update_failure_with_scope(failure, true, 0, FailureScope::Default);
-                    if !self.send_logon_response_and_keep_alive().await {
-                        return false;
-                    }
-                    self.try_start_cm(lr.my_id, lr.my_name, self.authorized);
+                    // Szperacz (130.1): poprawny kod to dopiero pierwszy krok — teraz klient
+                    // dostaje okienko AKCEPTUJ / ODRZUĆ, a serwisant czeka na jego decyzję
+                    // (zatwierdzenie przychodzi jako ipc::Data::Authorize z okienka).
+                    self.try_start_cm(lr.my_id, lr.my_name, false);
+                    self.send_login_error(crate::client::LOGIN_MSG_NO_PASSWORD_ACCESS)
+                        .await;
                 }
             }
         } else if let Some(message::Union::Auth2fa(tfa)) = msg.union {
