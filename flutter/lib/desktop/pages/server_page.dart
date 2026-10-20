@@ -21,6 +21,7 @@ import '../../common/widgets/chat_page.dart';
 import '../../models/file_model.dart';
 import '../../models/platform_model.dart';
 import '../../models/server_model.dart';
+import 'szperacz.dart';
 
 /// Set only by this window's own close control, and only once the user has confirmed. Any other
 /// way the window can go - a session logout closing every window, the window manager, a native
@@ -1037,16 +1038,11 @@ class _CmControlPanel extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: buildButton(context,
-                  color: Colors.redAccent,
-                  onClick: handleDisconnect,
-                  text: 'Disconnect',
-                  icon: Icon(
-                    Icons.link_off_rounded,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                  textColor: Colors.white),
+              child: szperaczKlawisz(
+                tekst: 'ROZŁĄCZ',
+                zielony: false,
+                onTap: () => checkClickTime(client.id, handleDisconnect),
+              ),
             ),
           ],
         )
@@ -1100,31 +1096,23 @@ class _CmControlPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Szperacz (114.1): duże przyciski w stylu etykiety.
             if (showAccept)
               Expanded(
-                child: Column(
-                  children: [
-                    buildButton(
-                      context,
-                      color: MyTheme.accent,
-                      onClick: () {
-                        handleAccept(context);
-                        windowManager.minimize();
-                      },
-                      text: 'Accept',
-                      textColor: Colors.white,
-                    ),
-                  ],
+                child: szperaczKlawisz(
+                  tekst: 'AKCEPTUJ',
+                  zielony: true,
+                  onTap: () => checkClickTime(client.id, () {
+                    handleAccept(context);
+                    windowManager.minimize();
+                  }),
                 ),
               ),
             Expanded(
-              child: buildButton(
-                context,
-                color: Colors.transparent,
-                border: Border.all(color: Colors.grey),
-                onClick: handleDisconnect,
-                text: 'Cancel',
-                textColor: null,
+              child: szperaczKlawisz(
+                tekst: 'ODRZUĆ',
+                zielony: false,
+                onTap: () => checkClickTime(client.id, handleDisconnect),
               ),
             ),
           ],

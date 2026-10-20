@@ -146,12 +146,14 @@ class _Klawisz extends StatefulWidget {
   final Color kolor;
   final Color cien;
   final VoidCallback onTap;
+  final double wysokosc;
   const _Klawisz(
       {required this.tekst,
       required this.ikona,
       required this.kolor,
       required this.cien,
-      required this.onTap});
+      required this.onTap,
+      this.wysokosc = 56});
 
   @override
   State<_Klawisz> createState() => _KlawiszState();
@@ -169,7 +171,7 @@ class _KlawiszState extends State<_Klawisz> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Container(
-          height: 56,
+          height: widget.wysokosc,
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
@@ -206,6 +208,23 @@ class _KlawiszState extends State<_Klawisz> {
       ),
     );
   }
+}
+
+/// Przycisk w stylu etykiety dla okienka połączenia (server_page.dart, 114.1):
+/// zielony do akceptacji, czerwony do odrzucenia lub rozłączenia.
+Widget szperaczKlawisz(
+    {required String tekst, required bool zielony, required VoidCallback onTap}) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(4, 4, 4, 9),
+    child: _Klawisz(
+      tekst: tekst,
+      ikona: zielony ? Icons.check_rounded : Icons.close_rounded,
+      kolor: zielony ? _Kolory.zielen : _Kolory.czerwien,
+      cien: zielony ? _Kolory.zielenCiemna : _Kolory.czerwienCiemna,
+      wysokosc: 44,
+      onTap: onTap,
+    ),
+  );
 }
 
 /// Ekran startowy: wybór, kto się z kim łączy.
