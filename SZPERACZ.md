@@ -25,6 +25,11 @@ Pierwsza budowa trwa około godziny, kolejne są szybsze dzięki pamięci podrę
 Numer wersji: `szperaczWersja` w `flutter/lib/desktop/pages/szperacz.dart`. Numer budowy, datę i skrót commita
 wpisuje workflow (krok „Wpisz numer budowy”); widać je w stopce okien programu i w nazwie wydania „najnowsza”.
 
+### 0.10.3 (20.10.2026)
+
+1. Kursor serwisanta zawsze widoczny u klienta (strzałka z nazwą), także podczas sterowania —
+   można klientowi coś pokazać na ekranie.
+
 ### 0.10.2 (20.10.2026) — własna domena
 
 1. Adres serwera: szperacz-server.minitel24.pl (domena w OVH) zamiast adresu DDNS huba.
