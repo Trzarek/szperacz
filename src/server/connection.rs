@@ -5244,6 +5244,11 @@ impl Connection {
         // But it's not necessary now and we have to consider two audio services(client, server).
         crate::audio_service::set_voice_call_input_device(None, true);
         log::info!("#{} Connection closed: {}", self.inner.id(), reason);
+        // Szperacz (135.3): po każdej zakończonej sesji nowy kod jednorazowy,
+        // żeby raz podyktowany kod nie otwierał komputera drugi raz. Numer ID zostaje bez zmian.
+        if self.authorized {
+            password::update_temporary_password();
+        }
         if lock
             && self.lock_after_session_end
             && self.keyboard

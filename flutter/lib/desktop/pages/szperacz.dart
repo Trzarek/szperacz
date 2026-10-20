@@ -227,14 +227,21 @@ Widget szperaczKlawisz({
   required String tekst,
   required bool zielony,
   required VoidCallback onTap,
+  bool zloty = false,
 }) {
   return Padding(
     padding: const EdgeInsets.fromLTRB(4, 4, 4, 9),
     child: _Klawisz(
       tekst: tekst,
-      ikona: zielony ? Icons.check_rounded : Icons.close_rounded,
-      kolor: zielony ? _Kolory.zielen : _Kolory.czerwien,
-      cien: zielony ? _Kolory.zielenCiemna : _Kolory.czerwienCiemna,
+      ikona: zloty
+          ? Icons.security_rounded
+          : (zielony ? Icons.check_rounded : Icons.close_rounded),
+      kolor: zloty
+          ? _Kolory.zlotoCiemne
+          : (zielony ? _Kolory.zielen : _Kolory.czerwien),
+      cien: zloty
+          ? const Color(0xFF4A3A08)
+          : (zielony ? _Kolory.zielenCiemna : _Kolory.czerwienCiemna),
       wysokosc: 44,
       onTap: onTap,
     ),
