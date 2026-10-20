@@ -248,6 +248,80 @@ Widget szperaczKlawisz({
   );
 }
 
+/// Tytuł okienka dialogowego w stylu etykiety (137.x).
+Widget szperaczTytulOkna(String tekst) => Text(
+  tekst,
+  textAlign: TextAlign.center,
+  style: const TextStyle(
+    fontFamily: 'SzperaczSlab',
+    fontSize: 20,
+    letterSpacing: 2,
+    color: _Kolory.czerwien,
+  ),
+);
+
+/// Pole na kod jednorazowy klienta u serwisanta (137.x): mała etykieta, kod zawsze widoczny,
+/// bez „Zapamiętaj hasło”, bo kod zmienia się po każdej sesji.
+Widget szperaczPoleKodu({
+  required TextEditingController kontroler,
+  required bool autoFocus,
+  required VoidCallback onSubmit,
+}) {
+  return SzperaczMalaKarta(
+    padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _maly('WPISZ KOD Z EKRANU KLIENTA'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: kontroler,
+          autofocus: autoFocus,
+          obscureText: false,
+          autocorrect: false,
+          enableSuggestions: false,
+          textAlign: TextAlign.center,
+          onSubmitted: (_) => onSubmit(),
+          style: const TextStyle(
+            fontFamily: 'SzperaczMono',
+            fontWeight: FontWeight.w700,
+            fontSize: 26,
+            letterSpacing: 4,
+            color: _Kolory.tusz,
+          ),
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: _Kolory.kupon,
+            hintText: 'kod',
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 10,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: _Kolory.czerwien, width: 2),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: _Kolory.czerwien, width: 3),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Kod zmienia się po każdej sesji.',
+          style: TextStyle(
+            fontFamily: 'SzperaczSerif',
+            fontSize: 13,
+            color: _Kolory.tusz,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 /// Ekran startowy: wybór, kto się z kim łączy.
 class SzperaczWybor extends StatelessWidget {
   const SzperaczWybor({Key? key}) : super(key: key);
