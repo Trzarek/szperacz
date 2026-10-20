@@ -7,6 +7,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore: [".github/workflows/szperacz-publikuj.yml", "**.md"]
+
+permissions:
+  contents: write
 
 env:
   SCITER_RUST_VERSION: "1.75"
@@ -143,3 +147,12 @@ jobs:
         with:
           name: Szperacz-windows-x64
           path: ./Wynik/Szperacz.exe
+
+      # Publiczne wydanie „najnowsza” — pobieranie bez logowania (np. prosto na QNAP).
+      - name: Publish Szperacz.exe
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        with:
+          tag_name: najnowsza
+          name: Szperacz - najnowsza wersja
+          body: Szperacz.exe - pomoc zdalna MINITEL (na bazie RustDesk 1.5.0, AGPL-3.0).
+          files: ./Wynik/Szperacz.exe
