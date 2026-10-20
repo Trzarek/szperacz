@@ -13,7 +13,7 @@ final szperaczTryb = RxnString();
 
 /// Wersja Szperacza (141.x). SZPERACZ_BUDOWA podmienia workflow GitHub Actions
 /// na numer budowy, datę i skrót commita; przy budowie lokalnej zostaje „lokalna”.
-const szperaczWersja = '0.10.0';
+const szperaczWersja = '0.10.1';
 const szperaczBudowa = 'SZPERACZ_BUDOWA';
 
 /// Napis z wersją do stopek okien.
@@ -474,12 +474,41 @@ class SzperaczOperator extends StatefulWidget {
 
 class _SzperaczOperatorState extends State<SzperaczOperator> {
   final _numer = TextEditingController();
+  final _kod = TextEditingController();
 
   @override
   void dispose() {
     _numer.dispose();
+    _kod.dispose();
     super.dispose();
   }
+
+  Widget _poleWpisu(TextEditingController k, String podpowiedz) => TextField(
+    controller: k,
+    onSubmitted: (_) => _polacz(),
+    style: const TextStyle(
+      fontFamily: 'SzperaczMono',
+      fontWeight: FontWeight.w700,
+      fontSize: 20,
+      letterSpacing: 3,
+      color: _Kolory.tusz,
+    ),
+    decoration: InputDecoration(
+      isDense: true,
+      filled: true,
+      fillColor: _Kolory.kupon,
+      hintText: podpowiedz,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: _Kolory.czerwien, width: 1.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: _Kolory.czerwien, width: 2.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+    ),
+  );
 
   void _polacz() {
     final id = _numer.text.replaceAll(' ', '').trim();
@@ -487,7 +516,10 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
       showToast('Wpisz numer klienta');
       return;
     }
-    connect(context, id);
+    final kod = _kod.text.trim();
+    // Z kodem: logowanie od razu z kodem; bez kodu program sam zapyta o kod.
+    connect(context, id, password: kod.isEmpty ? null : kod);
+    _kod.clear();
   }
 
   Widget _malyKupon(TextEditingController k) =>
@@ -566,44 +598,13 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
               child: Row(
                 children: [
                   _maly('NUMER KLIENTA'),
+                  const SizedBox(width: 8),
+                  Expanded(flex: 3, child: _poleWpisu(_numer, '123 456 789')),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _numer,
-                      onSubmitted: (_) => _polacz(),
-                      style: const TextStyle(
-                        fontFamily: 'SzperaczMono',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
-                        letterSpacing: 3,
-                        color: _Kolory.tusz,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        filled: true,
-                        fillColor: _Kolory.kupon,
-                        hintText: '123 456 789',
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: _Kolory.czerwien,
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: _Kolory.czerwien,
-                            width: 2.5,
-                          ),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Kod od klienta wpisany od razu (150.2) — bez osobnego okienka kodu.
+                  _maly('KOD'),
+                  const SizedBox(width: 8),
+                  Expanded(flex: 2, child: _poleWpisu(_kod, 'kod')),
                   const SizedBox(width: 6),
                   SizedBox(
                     width: 150,

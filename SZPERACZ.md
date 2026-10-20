@@ -25,6 +25,11 @@ Pierwsza budowa trwa około godziny, kolejne są szybsze dzięki pamięci podrę
 Numer wersji: `szperaczWersja` w `flutter/lib/desktop/pages/szperacz.dart`. Numer budowy, datę i skrót commita
 wpisuje workflow (krok „Wpisz numer budowy”); widać je w stopce okien programu i w nazwie wydania „najnowsza”.
 
+### 0.10.1 (20.10.2026) — poprawka po teście 2
+
+1. Okienko kodu u serwisanta znikało, zanim dało się wpisać kod (serwer wysyłał drugi komunikat) — naprawione.
+2. W panelu „Łączę się z kimś” pole KOD obok numeru klienta — kod wpisuje się od razu, bez osobnego okienka.
+
 ### 0.10.0 (20.10.2026) — stali klienci
 
 1. Hasło stałe ustawiane przez klienta w jego oknie Szperacza (min. 10 znaków, można usunąć).

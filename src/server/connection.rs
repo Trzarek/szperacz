@@ -3017,8 +3017,9 @@ impl Connection {
             } else if lr.password.is_empty() {
                 // Szperacz (130.1): bez kodu klient nie dostaje okienka akceptacji —
                 // serwisant musi najpierw wpisać kod jednorazowy z ekranu klienta.
-                self.send_login_error(crate::client::LOGIN_MSG_PASSWORD_EMPTY)
-                    .await;
+                // Serwer nic nie odsyła (150.1): program serwisanta sam pokazuje okienko kodu
+                // (client.rs handle_hash), a drugi komunikat zamykał je, zanim dało się coś wpisać.
+                // Połączenie czeka na ponowne logowanie z kodem (limit LOGIN_GRACE).
             } else {
                 let (failure, res) = self.check_failure(0).await;
                 if !res {
