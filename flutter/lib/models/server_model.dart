@@ -32,6 +32,7 @@ class ServerModel with ChangeNotifier {
   bool _clipboardOk = false;
   bool _showElevation = false;
   bool hideCm = false;
+  bool _szperaczSchowane = false; // Szperacz 231.3: czy CM schowało główne okno
   int _connectStatus = 0; // Rendezvous Server status
   String _verificationMethod = "";
   String _temporaryPasswordLength = "";
@@ -163,6 +164,10 @@ class ServerModel with ChangeNotifier {
           updateClientState(res);
         } else {
           if (_clients.isEmpty) {
+            if (_szperaczSchowane) {
+              _szperaczSchowane = false;
+              bind.szperaczOknoGlowne(przywroc: true);
+            }
             hideCmWindow();
             if (_zeroClientLengthCounter++ == 12) {
               // 6 second
@@ -578,6 +583,23 @@ class ServerModel with ChangeNotifier {
     Future.delayed(Duration.zero, () async {
       if (!hideCm) windowOnTop(null);
     });
+    // Szperacz (231.x): okno akceptacji na wierzch i na środek ekranu, główne okno w dół.
+    // showCmWindow() minimalizuje okno po drodze, więc czekamy aż skończy.
+    if (!client.authorized && isWindows && !hideCm) {
+      Future.delayed(const Duration(milliseconds: 700), () async {
+        try {
+          _szperaczSchowane = bind.szperaczOknoGlowne(przywroc: false) ||
+              _szperaczSchowane;
+          await windowManager.restore();
+          await windowManager.show();
+          await windowManager.center();
+          await windowManager.setAlwaysOnTop(true);
+          await windowManager.focus();
+          Future.delayed(const Duration(seconds: 2),
+              () => windowManager.setAlwaysOnTop(false));
+        } catch (_) {}
+      });
+    }
     // Only do the hidden task when on Desktop.
     if (client.authorized && isDesktop) {
       cmHiddenTimer = Timer(const Duration(seconds: 3), () {

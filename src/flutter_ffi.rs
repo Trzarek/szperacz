@@ -1234,6 +1234,64 @@ pub fn szperacz_odszyfruj(dane: String) -> SyncReturn<String> {
     SyncReturn(hbb_common::password_security::decrypt_str_or_original(&dane, "00").0)
 }
 
+/// Szperacz (231.x): minimalizuje (`przywroc == false`) albo przywraca główne okno Szperacza
+/// z innego procesu — okno akceptacji połączenia (CM) działa w osobnym procesie.
+pub fn szperacz_okno_glowne(przywroc: bool) -> SyncReturn<bool> {
+    #[cfg(windows)]
+    unsafe {
+        use winapi::shared::minwindef::{BOOL, LPARAM, TRUE};
+        use winapi::shared::windef::HWND;
+        use winapi::um::winuser::{
+            EnumWindows, GetClassNameW, GetWindowTextW, GetWindowThreadProcessId, IsIconic,
+            IsWindowVisible, ShowWindow, SW_MINIMIZE, SW_RESTORE,
+        };
+        struct Stan {
+            pid: u32,
+            przywroc: bool,
+            zmieniono: bool,
+        }
+        unsafe extern "system" fn kazde(hwnd: HWND, l: LPARAM) -> BOOL {
+            let s = &mut *(l as *mut Stan);
+            let mut pid = 0u32;
+            GetWindowThreadProcessId(hwnd, &mut pid);
+            if pid == s.pid || IsWindowVisible(hwnd) == 0 {
+                return TRUE;
+            }
+            let mut buf = [0u16; 128];
+            let n = GetClassNameW(hwnd, buf.as_mut_ptr(), buf.len() as i32);
+            if String::from_utf16_lossy(&buf[..n.max(0) as usize]) != "FLUTTER_RUNNER_WIN32_WINDOW" {
+                return TRUE;
+            }
+            let n = GetWindowTextW(hwnd, buf.as_mut_ptr(), buf.len() as i32);
+            if String::from_utf16_lossy(&buf[..n.max(0) as usize]) != crate::common::get_app_name() {
+                return TRUE;
+            }
+            if s.przywroc {
+                if IsIconic(hwnd) != 0 {
+                    ShowWindow(hwnd, SW_RESTORE);
+                    s.zmieniono = true;
+                }
+            } else if IsIconic(hwnd) == 0 {
+                ShowWindow(hwnd, SW_MINIMIZE);
+                s.zmieniono = true;
+            }
+            TRUE
+        }
+        let mut s = Stan {
+            pid: std::process::id(),
+            przywroc,
+            zmieniono: false,
+        };
+        EnumWindows(Some(kazde), &mut s as *mut Stan as LPARAM);
+        return SyncReturn(s.zmieniono);
+    }
+    #[allow(unreachable_code)]
+    {
+        let _ = przywroc;
+        SyncReturn(false)
+    }
+}
+
 /// Szperacz (199.3): suma SHA-256 pobranego pliku aktualizacji (hex, małe litery); pusta przy błędzie.
 pub fn szperacz_sha256_pliku(sciezka: String) -> SyncReturn<String> {
     use hbb_common::sha2::{Digest, Sha256};

@@ -13,6 +13,7 @@ import 'package:flutter_hbb/utils/multi_window_manager.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:window_manager/window_manager.dart';
 
 /// Wybrany tryb: null = ekran wyboru, 'klient' = ktoś łączy się ze mną, 'operator' = łączę się z kimś.
 final szperaczTryb = RxnString();
@@ -1056,14 +1057,79 @@ Future<void> _aktualizuj(_NowaWersja n) async {
 
 // ───────────────────────────── okno 1: wybór trybu ─────────────────────────────
 
-Widget _naSrodku(Widget okno) => SzperaczTlo(
+Widget _naSrodku(Widget okno) => _DopasujOkno(okno: okno);
+
+/// 232.x: okno programu dopasowuje się do rdzawego okna — zielone tło
+/// wystaje ok. 1 cm (38 px) z każdej strony; okno ustawia się na środku ekranu.
+class _DopasujOkno extends StatefulWidget {
+  final Widget okno;
+  const _DopasujOkno({required this.okno});
+
+  @override
+  State<_DopasujOkno> createState() => _DopasujOknoState();
+}
+
+class _DopasujOknoState extends State<_DopasujOkno> {
+  static const _margines = 38.0;
+  final _obszar = GlobalKey();
+  final _tresc = GlobalKey();
+  Size? _ostatni;
+
+  void _dopasuj() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final o = _obszar.currentContext?.findRenderObject() as RenderBox?;
+      final t = _tresc.currentContext?.findRenderObject() as RenderBox?;
+      if (o == null || t == null || !o.hasSize || !t.hasSize) return;
+      try {
+        final okno = await windowManager.getSize();
+        // Różnica między oknem a obszarem tła = pasek tytułu i ramki.
+        final cel = Size(
+          (okno.width - o.size.width + t.size.width + 2 * _margines)
+              .roundToDouble(),
+          (okno.height - o.size.height + t.size.height + 2 * _margines)
+              .roundToDouble(),
+        );
+        if (_ostatni != null &&
+            (cel.width - _ostatni!.width).abs() < 3 &&
+            (cel.height - _ostatni!.height).abs() < 3) {
+          return;
+        }
+        if ((cel.width - okno.width).abs() < 3 &&
+            (cel.height - okno.height).abs() < 3) {
+          _ostatni = cel;
+          return;
+        }
+        _ostatni = cel;
+        await windowManager.setMinimumSize(const Size(200, 200));
+        await windowManager.setSize(cel);
+        await windowManager.center();
+      } catch (_) {}
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _dopasuj();
+    return SzperaczTlo(
+      key: _obszar,
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 36, 34, 24),
-          child: okno,
+          padding: const EdgeInsets.all(_margines),
+          child: NotificationListener<SizeChangedLayoutNotification>(
+            onNotification: (_) {
+              _dopasuj();
+              return false;
+            },
+            child: SizeChangedLayoutNotifier(
+              child: KeyedSubtree(key: _tresc, child: widget.okno),
+            ),
+          ),
         ),
       ),
     );
+  }
+}
 
 class SzperaczWybor extends StatefulWidget {
   const SzperaczWybor({Key? key}) : super(key: key);
@@ -1843,30 +1909,46 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
   final notatka = TextEditingController(text: k?.notatka ?? '');
   var blad = '';
   gFFI.dialogManager.show((setState, close, context) {
+    // 230.3: każdy błąd widoczny u góry okienka i w dymku — wcześniej napis
+    // pod polami bywał poza ekranem i ZAPISZ „nie reagowało”.
+    void pokazBlad(String t) {
+      setState(() => blad = t);
+      showToast(t);
+    }
+
     void zapisz() {
-      final id = nr.text.replaceAll(' ', '').trim();
+      final id = nr.text.replaceAll(RegExp(r'\s'), '').trim();
       if (!RegExp(r'^\d{9,10}$').hasMatch(id)) {
-        setState(() => blad = 'Numer musi mieć 9–10 cyfr.');
+        pokazBlad('Numer musi mieć 9–10 cyfr.');
         return;
       }
       if (nazwa.text.trim().isEmpty) {
-        setState(() => blad = 'Wpisz nazwę klienta.');
+        pokazBlad('Wpisz nazwę klienta.');
         return;
       }
       if (haslo.text.trim().length < 10) {
-        setState(() => blad = 'Hasło stałe musi mieć co najmniej 10 znaków.');
+        pokazBlad('Hasło stałe musi mieć co najmniej 10 znaków.');
         return;
       }
       final nowy =
           _Klient(id, nazwa.text.trim(), haslo.text.trim(), notatka.text.trim());
-      if (indeks == null) {
-        lista.add(nowy);
-      } else {
-        lista[indeks] = nowy;
+      try {
+        if (indeks == null) {
+          lista.add(nowy);
+        } else {
+          lista[indeks] = nowy;
+        }
+        _zapiszKsiazke(lista);
+      } catch (e) {
+        if (indeks == null) lista.remove(nowy);
+        pokazBlad('Nie udało się zapisać: $e');
+        return;
       }
-      _zapiszKsiazke(lista);
-      poZapisie();
       close();
+      try {
+        poZapisie();
+      } catch (_) {}
+      showToast('Zapisano: ${nowy.nazwa}');
     }
 
     Widget et(String t) => Padding(
@@ -1880,6 +1962,22 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (blad.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xCC5E0B0B),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: _K.zlotoSrednie),
+              ),
+              child: Text(blad,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12)),
+            ),
           et('NUMER KLIENTA (ID)'),
           Pole3D(kontroler: nr, podpowiedz: '123456789', autoFocus: true),
           et('NAZWA'),
@@ -1896,15 +1994,6 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
               podpowiedz: 'np. komputer w recepcji',
               cyfry: false,
               onSubmitted: (_) => zapisz()),
-          if (blad.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(blad,
-                  style: const TextStyle(
-                      color: Color(0xFFFFB4A0),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11)),
-            ),
         ],
       ),
       akcje: [
