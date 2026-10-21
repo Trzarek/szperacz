@@ -2554,13 +2554,24 @@ class _AboutState extends State<_About> {
       final scrollController = ScrollController();
       return SingleChildScrollView(
         controller: scrollController,
-        child: _Card(title: translate('About RustDesk'), children: [
+        child: _Card(title: 'O programie Szperacz', children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(
                 height: 8.0,
               ),
+              // Szperacz (254.1): informacja o pochodzeniu i licencji.
+              SelectionArea(
+                  child: Text('Szperacz — MINITEL, $szperaczOpisWersji')
+                      .marginSymmetric(vertical: 4.0)),
+              InkWell(
+                  onTap: () => launchUrlString(
+                      'https://github.com/Trzarek/szperacz'),
+                  child: const Text(
+                    'Na podstawie RustDesk (AGPL-3.0), kod: github.com/Trzarek/szperacz',
+                    style: linkStyle,
+                  ).marginSymmetric(vertical: 4.0)),
               SelectionArea(
                   child: Text('${translate('Version')}: $version')
                       .marginSymmetric(vertical: 4.0)),
