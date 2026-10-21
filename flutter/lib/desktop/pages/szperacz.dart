@@ -1063,8 +1063,165 @@ Widget _naSrodku(Widget okno) => SzperaczTlo(
       ),
     );
 
-class SzperaczWybor extends StatelessWidget {
+class SzperaczWybor extends StatefulWidget {
   const SzperaczWybor({Key? key}) : super(key: key);
+
+  @override
+  State<SzperaczWybor> createState() => _SzperaczWyborState();
+}
+
+class _SzperaczWyborState extends State<SzperaczWybor> {
+  // 215.x: czerwony klawisz „ŁĄCZĘ SIĘ Z KIMŚ” zamienia się w pole PIN.
+  bool _pin = false;
+  bool _czekam = false;
+  String _komunikat = '';
+  final _kontroler = TextEditingController();
+
+  @override
+  void dispose() {
+    _kontroler.dispose();
+    super.dispose();
+  }
+
+  void _anuluj() => setState(() {
+        _pin = false;
+        _komunikat = '';
+        _kontroler.clear();
+      });
+
+  Future<void> _wejdz() async {
+    if (_czekam) return;
+    setState(() {
+      _czekam = true;
+      _komunikat = 'Sprawdzam…';
+    });
+    final blad = await szperaczSprawdzPin(_kontroler.text.trim());
+    if (!mounted) return;
+    setState(() {
+      _czekam = false;
+      _komunikat = blad ?? '';
+      _kontroler.clear();
+      if (blad == null) _pin = false;
+    });
+  }
+
+  Widget _malyKlawisz(IconData ikona, List<Color> kolory, Color kolorIkony,
+          VoidCallback onTap) =>
+      MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 30,
+            height: 28,
+            margin: const EdgeInsets.only(left: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: _K.zlotoSrednie, width: 2),
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: kolory),
+            ),
+            child: Icon(ikona, size: 16, color: kolorIkony),
+          ),
+        ),
+      );
+
+  Widget _polePin() {
+    return CallbackShortcuts(
+      bindings: {const SingleActivator(LogicalKeyboardKey.escape): _anuluj},
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 9),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.fromLTRB(10, 0, 6, 0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: _K.zlotoSrednie, width: 2),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF07070),
+                Color(0xFFC02C2C),
+                Color(0xFF9E1B1B),
+                Color(0xFF5E0B0B)
+              ],
+              stops: [0.0, 0.3, 0.7, 1.0],
+            ),
+            boxShadow: const [
+              BoxShadow(color: Color(0xFF4A0A0A), offset: Offset(0, 5)),
+              BoxShadow(color: Color(0xFF2A0505), offset: Offset(0, 7)),
+              BoxShadow(
+                  color: Color(0xB3000000),
+                  offset: Offset(0, 10),
+                  blurRadius: 12),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Text('PIN',
+                  style: TextStyle(
+                      fontFamily: 'SzperaczSlab',
+                      fontSize: 11,
+                      color: Colors.white)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFFD9C79F), Color(0xFFFFFBEE)],
+                      stops: [0.0, 0.3],
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _kontroler,
+                    autofocus: true,
+                    obscureText: true,
+                    obscuringCharacter: '•',
+                    readOnly: _czekam,
+                    onSubmitted: (_) => _wejdz(),
+                    style: const TextStyle(
+                        fontFamily: 'SzperaczMono',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        letterSpacing: 5,
+                        color: _K.tusz,
+                        shadows: []),
+                    cursorColor: _K.tusz,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    ),
+                  ),
+                ),
+              ),
+              _malyKlawisz(
+                  Icons.arrow_forward_rounded,
+                  const [
+                    Color(0xFF5CC08A),
+                    Color(0xFF1F8A50),
+                    Color(0xFF053A1D)
+                  ],
+                  Colors.white,
+                  _wejdz),
+              _malyKlawisz(
+                  Icons.close_rounded,
+                  const [Color(0xFF3A2716), Color(0xFF140C06)],
+                  _K.zlotoJasne,
+                  _anuluj),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1085,14 +1242,30 @@ class SzperaczWybor extends StatelessWidget {
               onTap: () => szperaczTryb.value = 'klient',
             ),
             const SizedBox(height: 6),
-            Klawisz3D(
-              tekst: 'ŁĄCZĘ SIĘ Z KIMŚ',
-              ikona: Icons.upload_rounded,
-              rodzaj: RodzajKlawisza.czerwony,
-              wysokosc: 40,
-              rozmiarNapisu: 11,
-              onTap: szperaczWejscieSerwisanta,
-            ),
+            if (_pin)
+              _polePin()
+            else
+              Klawisz3D(
+                tekst: 'ŁĄCZĘ SIĘ Z KIMŚ',
+                ikona: Icons.upload_rounded,
+                rodzaj: RodzajKlawisza.czerwony,
+                wysokosc: 40,
+                rozmiarNapisu: 11,
+                onTap: () => setState(() {
+                  _pin = true;
+                  _komunikat = '';
+                }),
+              ),
+            if (_komunikat.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(_komunikat,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: _czekam ? _K.opis : const Color(0xFFFFB4A0),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11)),
+              ),
           ],
         ),
       ),
@@ -1838,107 +2011,51 @@ void _oknoBlokady(String tekst) {
       ));
 }
 
-/// Wejście w „ŁĄCZĘ SIĘ Z KIMŚ”: okno „PIN SERWISANTA”, sprawdzenie na serwerze (201.1, 203.2).
-void szperaczWejscieSerwisanta() {
-  final pin = TextEditingController();
-  var blad = '';
-  var czekam = false;
-  gFFI.dialogManager.show((setState, close, context) {
-    Future<void> sprawdz() async {
-      if (czekam) return;
-      if (_mojeId.isEmpty) {
-        setState(() => blad = 'Program jeszcze nie ma identyfikatora — chwilę poczekaj.');
-        return;
-      }
-      setState(() {
-        czekam = true;
-        blad = '';
-      });
-      final o = await _zapytaj('wejscie', {'komputer': _mojeId, 'pin': pin.text.trim()});
-      setState(() => czekam = false);
-      if (o == null) {
-        // 209.3: bez serwera najwyżej 24 h od ostatniego udanego wejścia.
-        final d = _dopuszczenie();
-        final teraz = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-        if (d != null && (d['do'] as int) > teraz) {
-          close();
-          szperaczTryb.value = 'operator';
-          showToast('Serwer niedostępny — tryb serwisanta do ${DateTime.fromMillisecondsSinceEpoch((d['do'] as int) * 1000).toString().substring(0, 16)}');
-        } else {
-          setState(() => blad = 'Brak połączenia z serwerem MINITEL.');
-        }
-        return;
-      }
-      if (o['ok'] == true) {
-        _zapamietaj({'nazwa': o['nazwa'], 'do': o['do'], 'token': o['token']});
-        close();
-        szperaczTryb.value = 'operator';
-        showToast('Witaj, ${o['nazwa']}');
-        return;
-      }
-      switch (o['blad']) {
-        case 'pin':
-          pin.clear();
-          setState(() => blad = (o['zostalo'] ?? 0) > 0
-              ? 'Zły PIN. Zostało prób: ${o['zostalo']}.'
-              : 'Zły PIN. Wejście zablokowane na 15 minut.');
-          break;
-        case 'czekaj':
-          setState(() => blad = 'Za dużo błędnych PIN-ów. Spróbuj za ${o['minut']} min.');
-          break;
-        case 'niezatwierdzony':
-          close();
-          _oknoBlokady('Ten komputer nie jest jeszcze zatwierdzony do trybu serwisanta. '
-              'Podaj MINITEL swój identyfikator.');
-          break;
-        default:
-          _zapamietaj(null);
-          close();
-          _oknoBlokady('Dostęp do trybu serwisanta został zablokowany.');
-      }
+/// Sprawdzenie PIN-u serwisanta na serwerze (201.1, 203.2, 209.3).
+/// Zwraca null, gdy wolno wejść (i przełącza w tryb serwisanta), albo komunikat błędu.
+Future<String?> szperaczSprawdzPin(String pin) async {
+  if (_mojeId.isEmpty) {
+    return 'Program jeszcze nie ma identyfikatora — chwilę poczekaj.';
+  }
+  if (pin.isEmpty) return 'Wpisz PIN.';
+  final o = await _zapytaj('wejscie', {'komputer': _mojeId, 'pin': pin});
+  if (o == null) {
+    // 209.3: bez serwera najwyżej 24 h od ostatniego udanego wejścia.
+    final d = _dopuszczenie();
+    final teraz = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (d != null && (d['do'] as int) > teraz) {
+      final do_ = DateTime.fromMillisecondsSinceEpoch((d['do'] as int) * 1000)
+          .toString()
+          .substring(0, 16);
+      szperaczTryb.value = 'operator';
+      showToast('Serwer niedostępny — tryb serwisanta do $do_');
+      return null;
     }
-
-    return SzperaczDialog(
-      tytul: 'PIN SERWISANTA',
-      onEscape: close,
-      tresc: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          szperaczEtykieta('WPISZ SWÓJ PIN'),
-          const SizedBox(height: 8),
-          Pole3D(
-              kontroler: pin,
-              podpowiedz: 'PIN',
-              duze: true,
-              autoFocus: true,
-              onSubmitted: (_) => sprawdz()),
-          if (czekam)
-            Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: _opis('Sprawdzam…', rozmiar: 11)),
-          if (blad.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(blad,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Color(0xFFFFB4A0),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11)),
-            ),
-        ],
-      ),
-      akcje: [
-        Klawisz3D(
-            tekst: 'ANULUJ',
-            ikona: Icons.close_rounded,
-            rodzaj: RodzajKlawisza.czerwony,
-            onTap: close),
-        Klawisz3D(tekst: 'WEJDŹ', ikona: Icons.login_rounded, onTap: sprawdz),
-      ],
-    );
-  });
+    return 'Brak połączenia z serwerem MINITEL.';
+  }
+  if (o['ok'] == true) {
+    _zapamietaj({'nazwa': o['nazwa'], 'do': o['do'], 'token': o['token']});
+    szperaczTryb.value = 'operator';
+    showToast('Witaj, ${o['nazwa']}');
+    return null;
+  }
+  switch (o['blad']) {
+    case 'pin':
+      return (o['zostalo'] ?? 0) > 0
+          ? 'Zły PIN. Zostało prób: ${o['zostalo']}.'
+          : 'Zły PIN. Wejście zablokowane na 15 minut.';
+    case 'czekaj':
+      return 'Za dużo błędnych PIN-ów. Spróbuj za ${o['minut']} min.';
+    case 'niezatwierdzony':
+      _oknoBlokady(
+          'Ten komputer nie jest jeszcze zatwierdzony do trybu serwisanta. '
+          'Podaj MINITEL swój identyfikator.');
+      return 'Komputer niezatwierdzony.';
+    default:
+      _zapamietaj(null);
+      _oknoBlokady('Dostęp do trybu serwisanta został zablokowany.');
+      return 'Tryb serwisanta zablokowany.';
+  }
 }
 
 /// Wpis połączenia do rejestru na serwerze (202.2); serwer może zgłosić blokadę (204.1).
