@@ -245,6 +245,8 @@ fn execute(path: PathBuf, args: Vec<String>, _ui: bool) {
     }
 
     cmd.env(APPNAME_RUNTIME_ENV_KEY, exe_name);
+    // Szperacz (199.3): pełna ścieżka do Szperacz.exe — samoaktualizacja podmienia ten plik.
+    cmd.env("SZPERACZ_PLIK", &exe);
     if use_null_stdio() {
         cmd.stdin(Stdio::null())
             .stdout(Stdio::null())

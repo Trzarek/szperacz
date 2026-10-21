@@ -1129,6 +1129,23 @@ _connectDialog(
       );
     }
 
+    if (osUsernameController == null && passwordController != null) {
+      // Szperacz (200.1): okienko kodu w stylu rdzawego okna 3D.
+      return SzperaczDialog(
+        tytul: 'KOD OD KLIENTA',
+        onEscape: cancel,
+        tresc: passwdWidget(),
+        akcje: [
+          Klawisz3D(
+              tekst: 'ANULUJ',
+              ikona: Icons.close_rounded,
+              rodzaj: RodzajKlawisza.czerwony,
+              onTap: cancel),
+          Klawisz3D(
+              tekst: 'POŁĄCZ', ikona: Icons.power_rounded, onTap: submit),
+        ],
+      );
+    }
     return CustomAlertDialog(
       title: osUsernameController == null
           ? szperaczTytulOkna('KOD OD KLIENTA')

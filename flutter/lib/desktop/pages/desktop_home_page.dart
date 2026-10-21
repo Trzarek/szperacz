@@ -69,7 +69,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           return const SzperaczKlient();
         default:
           // Okno 4 (119.x): panel operatora jako mniejsza etykieta.
-          return const SzperaczOperator(listaKomputerow: PeerTabPage());
+          return const SzperaczOperator();
       }
     });
   }

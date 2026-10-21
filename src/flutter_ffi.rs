@@ -1222,6 +1222,36 @@ pub fn main_get_env(key: String) -> SyncReturn<String> {
     SyncReturn(std::env::var(key).unwrap_or_default())
 }
 
+/// Szperacz (200.5): szyfrowanie haseł stałych w książce klientów (klucz zależny od komputera).
+pub fn szperacz_szyfruj(dane: String) -> SyncReturn<String> {
+    SyncReturn(hbb_common::password_security::encrypt_str_or_original(
+        &dane, "00", 1024,
+    ))
+}
+
+/// Szperacz (200.5): odszyfrowanie hasła z książki klientów.
+pub fn szperacz_odszyfruj(dane: String) -> SyncReturn<String> {
+    SyncReturn(hbb_common::password_security::decrypt_str_or_original(&dane, "00").0)
+}
+
+/// Szperacz (199.3): suma SHA-256 pobranego pliku aktualizacji (hex, małe litery); pusta przy błędzie.
+pub fn szperacz_sha256_pliku(sciezka: String) -> SyncReturn<String> {
+    use hbb_common::sha2::{Digest, Sha256};
+    match std::fs::read(&sciezka) {
+        Ok(dane) => {
+            let mut h = Sha256::new();
+            h.update(&dane);
+            SyncReturn(
+                h.finalize()
+                    .iter()
+                    .map(|b| format!("{:02x}", b))
+                    .collect::<String>(),
+            )
+        }
+        Err(_) => SyncReturn(String::new()),
+    }
+}
+
 // Dart does not support changing environment variables.
 // `Platform.environment['MY_VAR'] = 'VAR';` will throw an error
 // `Unsupported operation: Cannot modify unmodifiable map`.

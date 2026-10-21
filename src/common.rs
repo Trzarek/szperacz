@@ -1018,7 +1018,8 @@ pub fn is_modifier(evt: &KeyEvent) -> bool {
 }
 
 pub fn check_software_update() {
-    if is_custom_client() {
+    // Szperacz (200.8): aktualizacje sprawdza sam Szperacz (szperacz.minitel24.pl), nie RustDesk.
+    if true || is_custom_client() {
         return;
     }
     let opt = LocalConfig::get_option(keys::OPTION_ENABLE_CHECK_UPDATE);
