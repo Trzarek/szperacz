@@ -1091,7 +1091,7 @@ class SzperaczWybor extends StatelessWidget {
               rodzaj: RodzajKlawisza.czerwony,
               wysokosc: 40,
               rozmiarNapisu: 11,
-              onTap: () => szperaczTryb.value = 'operator',
+              onTap: szperaczWejscieSerwisanta,
             ),
           ],
         ),
@@ -1318,6 +1318,7 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
     }
     // Bez kodu — program zapyta o kod w okienku „KOD OD KLIENTA” (186.4).
     connect(context, id);
+    _zglosPolaczenie(id);
   }
 
   @override
@@ -1502,6 +1503,7 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
       close();
       wpiszNumer(lista[i].id);
       connect(ctx, lista[i].id, password: lista[i].haslo);
+      _zglosPolaczenie(lista[i].id);
     }
 
     final wysokosc = (MediaQuery.of(context).size.height * 0.45)
@@ -1777,4 +1779,181 @@ class _Surowy extends CustomAlertDialog {
 
   @override
   Widget build(BuildContext context) => dziecko;
+}
+
+// ───────────────────────────── strażnik trybu serwisanta (201–204, 209.3) ─────────────────────────────
+
+const _adresStrazy = 'https://szperacz.minitel24.pl/api';
+const _kluczStrazy = 'szperacz-straz';
+
+String get _mojeId => gFFI.serverModel.serverId.text.replaceAll(' ', '');
+
+/// Zapamiętane dopuszczenie: {nazwa, do, token} — zaszyfrowane.
+Map<String, dynamic>? _dopuszczenie() {
+  try {
+    final s = bind.mainGetLocalOption(key: _kluczStrazy);
+    if (s.isEmpty) return null;
+    return jsonDecode(bind.szperaczOdszyfruj(dane: s)) as Map<String, dynamic>;
+  } catch (_) {
+    return null;
+  }
+}
+
+void _zapamietaj(Map<String, dynamic>? d) => bind.mainSetLocalOption(
+    key: _kluczStrazy,
+    value: d == null ? '' : bind.szperaczSzyfruj(dane: jsonEncode(d)));
+
+Future<Map<String, dynamic>?> _zapytaj(String sciezka, Map<String, dynamic> dane) async {
+  try {
+    final r = await http
+        .post(Uri.parse('$_adresStrazy/$sciezka'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(dane))
+        .timeout(const Duration(seconds: 10));
+    if (r.statusCode != 200) return null;
+    return jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Okno „ZABLOKOWANY” (204.3).
+void _oknoBlokady(String tekst) {
+  gFFI.dialogManager.show((setState, close, context) => SzperaczDialog(
+        tytul: 'TRYB SERWISANTA ZABLOKOWANY',
+        onEscape: close,
+        tresc: Column(mainAxisSize: MainAxisSize.min, children: [
+          _opis(tekst),
+          const SizedBox(height: 8),
+          _opis('Twój identyfikator: $_mojeId', rozmiar: 11),
+          _opis('Skontaktuj się z MINITEL: biuro@minitel24.pl', rozmiar: 11),
+        ]),
+        akcje: [
+          Klawisz3D(
+              tekst: 'ZAMKNIJ',
+              ikona: Icons.close_rounded,
+              rodzaj: RodzajKlawisza.czerwony,
+              onTap: close),
+        ],
+      ));
+}
+
+/// Wejście w „ŁĄCZĘ SIĘ Z KIMŚ”: okno „PIN SERWISANTA”, sprawdzenie na serwerze (201.1, 203.2).
+void szperaczWejscieSerwisanta() {
+  final pin = TextEditingController();
+  var blad = '';
+  var czekam = false;
+  gFFI.dialogManager.show((setState, close, context) {
+    Future<void> sprawdz() async {
+      if (czekam) return;
+      if (_mojeId.isEmpty) {
+        setState(() => blad = 'Program jeszcze nie ma identyfikatora — chwilę poczekaj.');
+        return;
+      }
+      setState(() {
+        czekam = true;
+        blad = '';
+      });
+      final o = await _zapytaj('wejscie', {'komputer': _mojeId, 'pin': pin.text.trim()});
+      setState(() => czekam = false);
+      if (o == null) {
+        // 209.3: bez serwera najwyżej 24 h od ostatniego udanego wejścia.
+        final d = _dopuszczenie();
+        final teraz = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+        if (d != null && (d['do'] as int) > teraz) {
+          close();
+          szperaczTryb.value = 'operator';
+          showToast('Serwer niedostępny — tryb serwisanta do ${DateTime.fromMillisecondsSinceEpoch((d['do'] as int) * 1000).toString().substring(0, 16)}');
+        } else {
+          setState(() => blad = 'Brak połączenia z serwerem MINITEL.');
+        }
+        return;
+      }
+      if (o['ok'] == true) {
+        _zapamietaj({'nazwa': o['nazwa'], 'do': o['do'], 'token': o['token']});
+        close();
+        szperaczTryb.value = 'operator';
+        showToast('Witaj, ${o['nazwa']}');
+        return;
+      }
+      switch (o['blad']) {
+        case 'pin':
+          pin.clear();
+          setState(() => blad = (o['zostalo'] ?? 0) > 0
+              ? 'Zły PIN. Zostało prób: ${o['zostalo']}.'
+              : 'Zły PIN. Wejście zablokowane na 15 minut.');
+          break;
+        case 'czekaj':
+          setState(() => blad = 'Za dużo błędnych PIN-ów. Spróbuj za ${o['minut']} min.');
+          break;
+        case 'niezatwierdzony':
+          close();
+          _oknoBlokady('Ten komputer nie jest jeszcze zatwierdzony do trybu serwisanta. '
+              'Podaj MINITEL swój identyfikator.');
+          break;
+        default:
+          _zapamietaj(null);
+          close();
+          _oknoBlokady('Dostęp do trybu serwisanta został zablokowany.');
+      }
+    }
+
+    return SzperaczDialog(
+      tytul: 'PIN SERWISANTA',
+      onEscape: close,
+      tresc: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          szperaczEtykieta('WPISZ SWÓJ PIN'),
+          const SizedBox(height: 8),
+          Pole3D(
+              kontroler: pin,
+              podpowiedz: 'PIN',
+              duze: true,
+              autoFocus: true,
+              onSubmitted: (_) => sprawdz()),
+          if (czekam)
+            Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: _opis('Sprawdzam…', rozmiar: 11)),
+          if (blad.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(blad,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Color(0xFFFFB4A0),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11)),
+            ),
+        ],
+      ),
+      akcje: [
+        Klawisz3D(
+            tekst: 'ANULUJ',
+            ikona: Icons.close_rounded,
+            rodzaj: RodzajKlawisza.czerwony,
+            onTap: close),
+        Klawisz3D(tekst: 'WEJDŹ', ikona: Icons.login_rounded, onTap: sprawdz),
+      ],
+    );
+  });
+}
+
+/// Wpis połączenia do rejestru na serwerze (202.2); serwer może zgłosić blokadę (204.1).
+Future<void> _zglosPolaczenie(String klient) async {
+  final d = _dopuszczenie();
+  if (d == null) return;
+  final o = await _zapytaj('zdarzenie', {
+    'komputer': _mojeId,
+    'token': d['token'],
+    'do': d['do'],
+    'klient': klient,
+  });
+  if (o != null && o['zablokowany'] == true) {
+    _zapamietaj(null);
+    szperaczTryb.value = null;
+    _oknoBlokady('Dostęp do trybu serwisanta został zablokowany.');
+  }
 }
