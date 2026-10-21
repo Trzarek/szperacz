@@ -1352,26 +1352,41 @@ class SzperaczKlient extends StatefulWidget {
 }
 
 class _SzperaczKlientState extends State<SzperaczKlient> {
-  bool _staly = false;
+  // 241.1: na czas połączenia główne okno znika; okno akceptacji / małe okienko
+  // (osobny proces CM) zapisuje liczbę połączeń do pliku sesji.
+  Timer? _timer;
+  bool _schowane = false;
 
   @override
   void initState() {
     super.initState();
-    _odswiez();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _sprawdzSesje());
   }
 
-  Future<void> _odswiez() async {
-    final ustawione =
-        (await bind.mainGetCommon(key: 'local-permanent-password-set')) ==
-            'true';
-    if (mounted) setState(() => _staly = ustawione);
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _sprawdzSesje() async {
+    final aktywne = await szperaczAktywneSesje();
+    try {
+      if (aktywne > 0 && !_schowane) {
+        _schowane = true;
+        await windowManager.hide();
+      } else if (aktywne == 0 && _schowane) {
+        // 245.1: po połączeniu wraca okno klienta z nowym kodem.
+        _schowane = false;
+        await windowManager.show();
+        await windowManager.focus();
+      }
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     final model = gFFI.serverModel;
-    final moznaInstalowac =
-        isWindows && !bind.isDisableInstallation() && !bind.mainIsInstalled();
     return _naSrodku(
       SzperaczOkno(
         child: Column(
@@ -1384,36 +1399,7 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
             _kupon(model.serverPasswd, rozmiar: 20, przerywany: false),
             _opis('Gdy serwisant się połączy, pojawi się okienko —\n'
                 'kliknij w nim AKCEPTUJ.'),
-            const SizedBox(height: 12),
-            szperaczEtykieta(
-                _staly ? 'STAŁY DOSTĘP: WŁĄCZONY' : 'STAŁY DOSTĘP: WYŁĄCZONY'),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Klawisz3D(
-                    tekst: _staly ? 'ZMIEŃ HASŁO' : 'HASŁO STAŁE',
-                    ikona: Icons.key_rounded,
-                    rodzaj: RodzajKlawisza.zloty,
-                    onTap: () => szperaczUstawHasloStale(
-                        jestUstawione: _staly, poZmianie: _odswiez),
-                  ),
-                ),
-                if (moznaInstalowac) ...[
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Klawisz3D(
-                      tekst: 'ZAINSTALUJ',
-                      ikona: Icons.download_rounded,
-                      onTap: () async {
-                        await rustDeskWinManager.closeAllSubWindows();
-                        bind.mainGotoInstall();
-                      },
-                    ),
-                  ),
-                ],
-              ],
-            ),
+            const SizedBox(height: 6),
             TextButton(
               onPressed: () => szperaczTryb.value = null,
               child: szperaczEtykieta('◀ WRÓĆ DO WYBORU'),
@@ -1422,6 +1408,29 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
         ),
       ),
     );
+  }
+}
+
+/// Plik sesji (241.x): CM zapisuje „liczba;czas” co 2 s, okno główne czyta.
+String get _plikSesji =>
+    '${Directory.systemTemp.path}${Platform.pathSeparator}szperacz_sesja.txt';
+
+Future<void> szperaczZapiszSesje(int aktywne) async {
+  try {
+    await File(_plikSesji)
+        .writeAsString('$aktywne;${DateTime.now().millisecondsSinceEpoch}');
+  } catch (_) {}
+}
+
+/// Liczba aktywnych połączeń; wpis starszy niż 6 s = 0 (CM mógł się zamknąć).
+Future<int> szperaczAktywneSesje() async {
+  try {
+    final c = (await File(_plikSesji).readAsString()).split(';');
+    final czas = int.parse(c[1]);
+    if (DateTime.now().millisecondsSinceEpoch - czas > 6000) return 0;
+    return int.parse(c[0]);
+  } catch (_) {
+    return 0;
   }
 }
 

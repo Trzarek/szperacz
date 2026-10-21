@@ -590,7 +590,8 @@ class ServerModel with ChangeNotifier {
       });
     }
     // Only do the hidden task when on Desktop.
-    if (client.authorized && isDesktop) {
+    // Szperacz (241.2): bez automatycznego minimalizowania — zostaje małe okienko.
+    if (false && client.authorized && isDesktop) {
       cmHiddenTimer = Timer(const Duration(seconds: 3), () {
         if (!hideCm) windowManager.minimize();
         cmHiddenTimer = null;

@@ -3,6 +3,7 @@ import 'package:flutter_hbb/common.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_home_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
+import 'package:flutter_hbb/desktop/pages/szperacz.dart' show szperaczTryb;
 import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/models/state_model.dart';
@@ -96,15 +97,18 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
             backgroundColor: Theme.of(context).colorScheme.background,
             body: DesktopTab(
               controller: tabController,
-              tail: Offstage(
-                offstage: bind.isIncomingOnly() || bind.isDisableSettings(),
+              // Szperacz (239.2, 243.3): ustawienia tylko w trybie serwisanta.
+              tail: Obx(() => Offstage(
+                offstage: bind.isIncomingOnly() ||
+                    bind.isDisableSettings() ||
+                    szperaczTryb.value != 'operator',
                 child: ActionIcon(
                   message: 'Settings',
                   icon: IconFont.menu,
                   onTap: DesktopTabPage.onAddSetting,
                   isClose: false,
                 ),
-              ),
+              )),
             )));
     return isMacOS || kUseCompatibleUiMode
         ? tabWidget

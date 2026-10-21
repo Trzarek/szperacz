@@ -22,6 +22,7 @@ import '../../models/file_model.dart';
 import '../../models/platform_model.dart';
 import '../../models/server_model.dart';
 import 'szperacz.dart';
+import 'szperacz_cm.dart';
 
 /// Set only by this window's own close control, and only once the user has confirmed. Any other
 /// way the window can go - a session logout closing every window, the window manager, a native
@@ -189,6 +190,8 @@ class ConnectionManagerState extends State<ConnectionManager>
       }
     }
 
+    // Szperacz (240–244): własne okno akceptacji i małe okienko połączeń.
+    if (serverModel.clients.isNotEmpty) return SzperaczCm(model: serverModel);
     return serverModel.clients.isEmpty
         ? Column(
             children: [
