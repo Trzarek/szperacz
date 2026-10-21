@@ -7,7 +7,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/common.dart' hide Dialog;
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
 import 'package:get/get.dart';
@@ -780,7 +780,7 @@ class SzperaczSekcja extends StatelessWidget {
 // ───────────────────────────── okno dialogowe ─────────────────────────────
 
 /// Okienko dialogowe w stylu Szperacza (zamiast CustomAlertDialog RustDeska).
-class SzperaczDialog extends StatelessWidget {
+class SzperaczDialog extends CustomAlertDialog {
   final String tytul;
   final Widget tresc;
   final List<Widget> akcje;
@@ -795,7 +795,7 @@ class SzperaczDialog extends StatelessWidget {
     this.szerokosc = 340,
     this.onEnter,
     this.onEscape,
-  }) : super(key: key);
+  }) : super(key: key, content: const SizedBox());
 
   @override
   Widget build(BuildContext context) {
@@ -1217,7 +1217,7 @@ void szperaczUstawHasloStale({
       zapisz(haslo);
     }
 
-    return CallbackShortcuts(
+    return _Surowy(CallbackShortcuts(
       bindings: {const SingleActivator(LogicalKeyboardKey.escape): close},
       child: Dialog(
         backgroundColor: Colors.transparent,
@@ -1288,7 +1288,7 @@ void szperaczUstawHasloStale({
           ),
         ),
       ),
-    );
+    ));
   });
 }
 
@@ -1769,3 +1769,12 @@ class SzperaczMalaKarta extends StatelessWidget {
 /// Kolory nagłówka okienka połączenia (czerwona wstęga 3D).
 const szperaczNaglowekKolory = [Color(0xFFB32424), Color(0xFF7A1414)];
 const szperaczZloto = _K.zlotoSrednie;
+
+/// Opakowanie, bo menedżer okienek RustDeska przyjmuje tylko CustomAlertDialog.
+class _Surowy extends CustomAlertDialog {
+  final Widget dziecko;
+  const _Surowy(this.dziecko) : super(content: const SizedBox());
+
+  @override
+  Widget build(BuildContext context) => dziecko;
+}
