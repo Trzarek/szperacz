@@ -48,6 +48,8 @@ class _K {
   static const zlotoCien = Color(0xFF3A2A06);
   static const tusz = Color(0xFF2A170C);
   static const czerwien = Color(0xFF9E1B1B);
+  // Tekst wpisywany w pola — w kolorze złotej ramki (ciemniejszy odcień, czytelny na kremie).
+  static const wpis = Color(0xFFA58219);
 }
 
 /// Warstwy wytłoczenia napisów 3D (od góry do dołu).
@@ -677,10 +679,10 @@ class Pole3D extends StatelessWidget {
             fontWeight: cyfry ? FontWeight.w700 : FontWeight.w400,
             fontSize: duze ? 24 : (cyfry ? 16 : 14),
             letterSpacing: duze ? 4 : (cyfry ? 1 : 0),
-            color: _K.tusz,
+            color: _K.wpis,
             shadows: const [],
           ),
-          cursorColor: _K.tusz,
+          cursorColor: _K.wpis,
           decoration: InputDecoration(
             isDense: true,
             border: InputBorder.none,
@@ -1190,9 +1192,9 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
                         fontWeight: FontWeight.w700,
                         fontSize: 22,
                         letterSpacing: 6,
-                        color: Color(0xFFC02C2C),
+                        color: _K.wpis,
                         shadows: []),
-                    cursorColor: _K.tusz,
+                    cursorColor: _K.wpis,
                     decoration: const InputDecoration(
                       isDense: true,
                       border: InputBorder.none,
@@ -1566,9 +1568,9 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                             fontFamily: 'SzperaczMono',
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
-                            color: _K.tusz,
+                            color: _K.wpis,
                             shadows: []),
-                        cursorColor: _K.tusz,
+                        cursorColor: _K.wpis,
                         decoration: const InputDecoration(
                           isDense: true,
                           border: InputBorder.none,
@@ -1929,13 +1931,60 @@ class SzperaczMalaKarta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Okienko połączenia wypełnia całe okno CM (zawartość ma Expanded),
+    // więc nie używamy SzperaczOkno (Column min) — tylko ten sam wygląd.
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 22, 18, 12),
-      child: SzperaczOkno(
-        maxSzerokosc: 2000,
-        padding: padding,
-        wyrownajDoLewej: true,
-        child: Theme(data: MyTheme.lightTheme, child: child),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _K.zloto, width: 4),
+                image: const DecorationImage(
+                  image: AssetImage('assets/szperacz_rdza.png'),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: const [
+                  BoxShadow(color: _K.zlotoCiemne, offset: Offset(0, 3)),
+                  BoxShadow(color: _K.zlotoBraz, offset: Offset(0, 6)),
+                ],
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(7),
+                padding: padding,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7),
+                  border:
+                      Border.all(color: const Color(0xB3C9A227), width: 1),
+                ),
+                child: DefaultTextStyle(
+                  style: const TextStyle(
+                      fontFamily: 'SzperaczSerif',
+                      color: _K.krem,
+                      fontSize: 13),
+                  child: Theme(data: MyTheme.lightTheme, child: child),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: -26,
+            right: -22,
+            child: IgnorePointer(
+              child: Transform.rotate(
+                angle: 0.28,
+                child: Opacity(
+                  opacity: 0.55,
+                  child: Image.asset('assets/szperacz_stempel.png',
+                      width: 90, height: 90),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
