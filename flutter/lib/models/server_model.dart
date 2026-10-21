@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -32,7 +33,6 @@ class ServerModel with ChangeNotifier {
   bool _clipboardOk = false;
   bool _showElevation = false;
   bool hideCm = false;
-  bool _szperaczSchowane = false; // Szperacz 231.3: czy CM schowało główne okno
   int _connectStatus = 0; // Rendezvous Server status
   String _verificationMethod = "";
   String _temporaryPasswordLength = "";
@@ -164,10 +164,6 @@ class ServerModel with ChangeNotifier {
           updateClientState(res);
         } else {
           if (_clients.isEmpty) {
-            if (_szperaczSchowane) {
-              _szperaczSchowane = false;
-              bind.szperaczOknoGlowne(przywroc: true);
-            }
             hideCmWindow();
             if (_zeroClientLengthCounter++ == 12) {
               // 6 second
@@ -583,21 +579,14 @@ class ServerModel with ChangeNotifier {
     Future.delayed(Duration.zero, () async {
       if (!hideCm) windowOnTop(null);
     });
-    // Szperacz (231.x): okno akceptacji na wierzch i na środek ekranu, główne okno w dół.
-    // showCmWindow() minimalizuje okno po drodze, więc czekamy aż skończy.
+    // Szperacz (231.x, 235.3): okno akceptacji przywrócone i na wierzchu.
+    // Krok 1 po błędzie z budowy #25: bez minimalizowania głównego okna (FFI)
+    // i bez „zawsze na wierzchu”; każdy krok osobno, błędy do pliku (235.4).
     if (!client.authorized && isWindows && !hideCm) {
       Future.delayed(const Duration(milliseconds: 700), () async {
-        try {
-          _szperaczSchowane = bind.szperaczOknoGlowne(przywroc: false) ||
-              _szperaczSchowane;
-          await windowManager.restore();
-          await windowManager.show();
-          await windowManager.center();
-          await windowManager.setAlwaysOnTop(true);
-          await windowManager.focus();
-          Future.delayed(const Duration(seconds: 2),
-              () => windowManager.setAlwaysOnTop(false));
-        } catch (_) {}
+        await _szperaczKrok('restore', () => windowManager.restore());
+        await _szperaczKrok('show', () => windowManager.show());
+        await _szperaczKrok('focus', () => windowManager.focus());
       });
     }
     // Only do the hidden task when on Desktop.
@@ -960,4 +949,18 @@ Future<void> showClientsMayNotBeChangedAlert(FFI? ffi) async {
       onCancel: close,
     );
   });
+}
+
+/// Szperacz (235.4): krok obsługi okna akceptacji; błąd nie może zamknąć okna,
+/// tylko trafia do %TEMP%\szperacz_cm.log.
+Future<void> _szperaczKrok(String nazwa, Future<void> Function() krok) async {
+  try {
+    await krok();
+  } catch (e, s) {
+    try {
+      await File('${Directory.systemTemp.path}${Platform.pathSeparator}szperacz_cm.log')
+          .writeAsString('${DateTime.now()} $nazwa: $e\n$s\n',
+              mode: FileMode.append);
+    } catch (_) {}
+  }
 }

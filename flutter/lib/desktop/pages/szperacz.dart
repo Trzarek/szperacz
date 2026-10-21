@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart' hide Dialog;
+import 'package:flutter_hbb/main.dart' show kWindowId;
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
 import 'package:get/get.dart';
@@ -813,7 +814,7 @@ class SzperaczDialog extends CustomAlertDialog {
         insetPadding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(top: 26, right: 22),
-          child: SzperaczOkno(
+          child: _PowiekszOkno(child: SzperaczOkno(
             maxSzerokosc: szerokosc,
             child: Theme(
               data: MyTheme.lightTheme,
@@ -838,7 +839,7 @@ class SzperaczDialog extends CustomAlertDialog {
                 ],
               ),
             ),
-          ),
+          )),
         ),
       ),
     );
@@ -1465,7 +1466,7 @@ void szperaczUstawHasloStale({
         elevation: 0,
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(top: 26, right: 22),
-          child: SzperaczOkno(
+          child: _PowiekszOkno(child: SzperaczOkno(
             maxSzerokosc: 340,
             child: Theme(
               data: MyTheme.lightTheme,
@@ -1526,7 +1527,7 @@ void szperaczUstawHasloStale({
                 ],
               ),
             ),
-          ),
+          )),
         ),
       ),
     ));
@@ -2211,4 +2212,57 @@ Future<void> _zglosPolaczenie(String klient) async {
     szperaczTryb.value = null;
     _oknoBlokady('Dostęp do trybu serwisanta został zablokowany.');
   }
+}
+
+/// 236.2: na czas otwarcia okienka główne okno powiększa się tak, żeby wokół
+/// okienka było ok. 1 cm zieleni; po zamknięciu wraca do poprzedniego rozmiaru.
+class _PowiekszOkno extends StatefulWidget {
+  final Widget child;
+  const _PowiekszOkno({required this.child});
+
+  @override
+  State<_PowiekszOkno> createState() => _PowiekszOknoState();
+}
+
+class _PowiekszOknoState extends State<_PowiekszOkno> {
+  static const _margines = 38.0;
+  final _klucz = GlobalKey();
+  Size? _poprzedni;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final r = _klucz.currentContext?.findRenderObject() as RenderBox?;
+      // Tylko okno główne (kWindowId == null), nie okno sesji ani CM.
+      if (!mounted || r == null || !r.hasSize || kWindowId != null) return;
+      if (desktopType != DesktopType.main) return;
+      try {
+        final widok = MediaQuery.of(context).size;
+        final okno = await windowManager.getSize();
+        // Okienko + margines + odstęp na stempel (26 px u góry i 22 px z prawej).
+        final potrzeba = Size(r.size.width + 2 * _margines + 22,
+            r.size.height + 2 * _margines + 26);
+        final dw = potrzeba.width - widok.width, dh = potrzeba.height - widok.height;
+        if (dw <= 0 && dh <= 0) return;
+        _poprzedni = okno;
+        await windowManager.setSize(Size(okno.width + (dw > 0 ? dw : 0),
+            okno.height + (dh > 0 ? dh : 0)));
+        await windowManager.center();
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    final p = _poprzedni;
+    if (p != null) {
+      windowManager.setSize(p).then((_) => windowManager.center());
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      KeyedSubtree(key: _klucz, child: widget.child);
 }
