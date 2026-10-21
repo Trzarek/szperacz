@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/desktop/pages/szperacz.dart';
 import 'package:flutter_hbb/common/widgets/audio_input.dart';
 import 'package:flutter_hbb/common/widgets/setting_widgets.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -68,12 +69,13 @@ class DesktopSettingPage extends StatefulWidget {
         !bind.isDisableSettings() &&
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) != 'Y')
       SettingsTabKey.safety,
-    if (!bind.isDisableSettings() &&
+    // Szperacz (200.6.5): bez zakładek Sieć, Konto i Drukarka.
+    if (false && !bind.isDisableSettings() &&
         bind.mainGetBuildinOption(key: kOptionHideNetworkSetting) != 'Y')
       SettingsTabKey.network,
     if (!bind.isIncomingOnly()) SettingsTabKey.display,
-    if (!bind.isDisableAccount()) SettingsTabKey.account,
-    if (isWindows &&
+    if (false && !bind.isDisableAccount()) SettingsTabKey.account,
+    if (false && isWindows &&
         !bind.isDisableSettings() &&
         bind.mainGetBuildinOption(key: kOptionHideRemotePrinterSetting) != 'Y')
       SettingsTabKey.printer,
@@ -273,45 +275,69 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    // Szperacz (200.6): jak pulpit — zielone tło, rdzawe okno w złotej ramie z 1 cm
+    // marginesu, ciemne zakładki 3D po lewej (aktywna złota), ciemne sekcje po prawej.
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: _buildBlock(
-        children: <Widget>[
-          SizedBox(
-            width: _kTabWidth,
-            child: Column(
-              children: [
-                _header(context),
-                Flexible(child: _listView(tabs: _settingTabs())),
+      backgroundColor: Colors.transparent,
+      body: SzperaczTlo(
+        child: Padding(
+          padding: const EdgeInsets.all(38),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFC9A227), width: 4),
+              image: const DecorationImage(
+                image: AssetImage('assets/szperacz_rdza.png'),
+                fit: BoxFit.cover,
+              ),
+              boxShadow: const [
+                BoxShadow(color: Color(0xFF8C6D12), offset: Offset(0, 3)),
+                BoxShadow(color: Color(0xFF5E4709), offset: Offset(0, 6)),
+                BoxShadow(
+                    color: Color(0xA6000000),
+                    offset: Offset(0, 12),
+                    blurRadius: 22),
               ],
             ),
-          ),
-          const VerticalDivider(width: 1),
-          Expanded(
-            child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: PageView(
-                controller: controller,
-                physics: NeverScrollableScrollPhysics(),
-                children: _children(),
+            padding: const EdgeInsets.all(10),
+            child: Theme(
+              data: MyTheme.darkTheme,
+              child: _buildBlock(
+                children: <Widget>[
+                  SizedBox(
+                    width: _kTabWidth,
+                    child: Column(
+                      children: [
+                        _header(context),
+                        Flexible(child: _listView(tabs: _settingTabs())),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(szperaczOpisWersji,
+                              style: const TextStyle(
+                                  fontSize: 10, color: Color(0xFFEAD7B0))),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: PageView(
+                      controller: controller,
+                      physics: NeverScrollableScrollPhysics(),
+                      children: _children(),
+                    ),
+                  )
+                ],
               ),
             ),
-          )
-        ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _header(BuildContext context) {
-    final settingsText = Text(
-      translate('Settings'),
-      textAlign: TextAlign.left,
-      style: const TextStyle(
-        color: _accentColor,
-        fontSize: _kTitleFontSize,
-        fontWeight: FontWeight.w400,
-      ),
-    );
+    final settingsText = const Napis3D('USTAWIENIA', rozmiar: 18, odstep: 2);
     return Row(
       children: [
         if (isWeb)
@@ -350,12 +376,25 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
   }
 
   Widget _listItem({required _TabInfo tab}) {
+    // Szperacz (200.6.3): ciemny klawisz 3D, ikona i napis do lewej, aktywny złoty.
+    const polskie = {
+      'General': 'OGÓLNE',
+      'Security': 'BEZPIECZEŃSTWO',
+      'Display': 'OBRAZ',
+      'About': 'O PROGRAMIE',
+    };
     return Obx(() {
       bool selected = tab.key == selectedTab.value;
-      return SizedBox(
-        width: _kTabWidth,
-        height: _kTabHeight,
-        child: InkWell(
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+        child: Klawisz3D(
+          tekst: polskie[tab.label] ?? translate(tab.label).toUpperCase(),
+          ikona: selected ? tab.selected : tab.unselected,
+          rodzaj: RodzajKlawisza.ciemny,
+          aktywny: selected,
+          doLewej: true,
+          wysokosc: 36,
+          rozmiarNapisu: 10,
           onTap: () {
             if (selectedTab.value != tab.key) {
               int index = DesktopSettingPage.tabKeys.indexOf(tab.key);
@@ -366,25 +405,6 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
             }
             selectedTab.value = tab.key;
           },
-          child: Row(children: [
-            Container(
-              width: 4,
-              height: _kTabHeight * 0.7,
-              color: selected ? _accentColor : null,
-            ),
-            Icon(
-              selected ? tab.selected : tab.unselected,
-              color: selected ? _accentColor : null,
-              size: 20,
-            ).marginOnly(left: 13, right: 10),
-            Text(
-              translate(tab.label),
-              style: TextStyle(
-                  color: selected ? _accentColor : null,
-                  fontWeight: FontWeight.w400,
-                  fontSize: _kContentFontSize),
-            ),
-          ]),
         ),
       );
     });
@@ -413,7 +433,8 @@ class _GeneralState extends State<_General> {
       controller: scrollController,
       children: [
         if (!isWeb) service(),
-        theme(),
+        // Szperacz: wygląd ustalony (rdza i złoto), bez wyboru motywu.
+        if (false) theme(),
         _Card(title: 'Language', children: [language()]),
         if (!isWeb) hwcodec(),
         if (!isWeb) audio(context),
@@ -996,9 +1017,10 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
               block: locked,
               child: Column(children: [
                 permissions(context),
-                password(context),
+                // Szperacz (200.6.5): tryb akceptacji i rodzaj hasła są zablokowane w programie.
+                if (false) password(context),
                 _Card(title: '2FA', children: [tfa()]),
-                if (!isChangeIdDisabled())
+                if (false && !isChangeIdDisabled())
                   _Card(title: 'ID', children: [changeId()]),
                 more(context),
               ]),
@@ -2615,29 +2637,39 @@ Widget _Card(
   return Row(
     children: [
       Flexible(
+        // Szperacz (200.6.4): sekcja prawie czarna ze złotą obwódką, wpisy do lewej.
         child: SizedBox(
           width: _kCardFixedWidth,
-          child: Card(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xBFC9A227)),
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xEB080402), Color(0xE60E0804)],
+              ),
+              boxShadow: const [
+                BoxShadow(color: Color(0x80000000), offset: Offset(0, 3)),
+              ],
+            ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Expanded(
-                        child: Text(
-                      translate(title),
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                        fontSize: _kTitleFontSize,
-                      ),
-                    )),
+                        child: szperaczEtykieta(
+                            translate(title).toUpperCase(),
+                            align: TextAlign.left)),
                     ...?title_suffix
                   ],
-                ).marginOnly(left: _kContentHMargin, top: 10, bottom: 10),
+                ).marginOnly(left: _kContentHMargin, top: 10, bottom: 6),
                 ...children
                     .map((e) => e.marginOnly(top: 4, right: _kContentHMargin)),
               ],
             ).marginOnly(bottom: 10),
-          ).marginOnly(left: _kCardLeftMargin, top: 15),
+          ).marginOnly(left: _kCardLeftMargin, top: 12),
         ),
       ),
     ],
