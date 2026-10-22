@@ -324,13 +324,14 @@ class ToolbarState {
 }
 
 class _ToolbarTheme {
-  static const Color blueColor = MyTheme.button;
-  static const Color hoverBlueColor = MyTheme.accent;
-  static Color inactiveColor = Colors.grey[800]!;
-  static Color hoverInactiveColor = Colors.grey[850]!;
+  // Szperacz (291.2): przyciski paska sesji w złocie i rdzy.
+  static const Color blueColor = Color(0xFF8C6D12);
+  static const Color hoverBlueColor = Color(0xFFC9A227);
+  static Color inactiveColor = const Color(0xFF2A170C);
+  static Color hoverInactiveColor = const Color(0xFF3A2716);
 
-  static const Color redColor = Colors.redAccent;
-  static const Color hoverRedColor = Colors.red;
+  static const Color redColor = Color(0xFFC02C2C);
+  static const Color hoverRedColor = Color(0xFF9E1B1B);
   // kMinInteractiveDimension
   static const double height = 20.0;
   static const double dividerHeight = 12.0;

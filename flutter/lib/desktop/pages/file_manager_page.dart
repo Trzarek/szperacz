@@ -178,7 +178,16 @@ class _FileManagerPageState extends State<FileManagerPage>
               ),
             ),
             child: Theme(
-              data: MyTheme.darkTheme,
+              // 291.3: ikony, przyciski i zaznaczenia w złocie.
+              data: MyTheme.darkTheme.copyWith(
+                colorScheme: MyTheme.darkTheme.colorScheme.copyWith(
+                    primary: const Color(0xFFC9A227),
+                    secondary: const Color(0xFFE0BC45)),
+                iconTheme: const IconThemeData(color: Color(0xFFF2D77A)),
+                highlightColor: const Color(0x40C9A227),
+                hoverColor: const Color(0x30C9A227),
+                dividerColor: const Color(0x80C9A227),
+              ),
               child: Row(
             children: [
               if (!isWeb)

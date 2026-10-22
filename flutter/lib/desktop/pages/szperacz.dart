@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart' hide Dialog;
+import 'package:flutter_hbb/consts.dart' show kWindowMainId;
 import 'package:flutter_hbb/main.dart' show kWindowId;
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
@@ -808,7 +809,10 @@ class SzperaczDialog extends CustomAlertDialog {
         if (onEscape != null)
           const SingleActivator(LogicalKeyboardKey.escape): onEscape!,
       },
-      child: Dialog(
+      // 289.1: zielone tło na całe okno — spod okienka nic nie prześwituje.
+      child: Stack(children: [
+        const Positioned.fill(child: SzperaczTlo(child: SizedBox.expand())),
+        Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         insetPadding: const EdgeInsets.all(24),
@@ -841,7 +845,7 @@ class SzperaczDialog extends CustomAlertDialog {
             ),
           )),
         ),
-      ),
+      )]),
     );
   }
 }
@@ -1644,9 +1648,33 @@ class SzperaczOperator extends StatefulWidget {
 
 class _SzperaczOperatorState extends State<SzperaczOperator> {
   final _numer = TextEditingController();
+  // 289.3: na czas sesji (okno ekranu klienta / plików) panel serwisanta się chowa.
+  Timer? _timer;
+  bool _schowany = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) async {
+      final sesja =
+          rustDeskWinManager.getActiveWindows().any((id) => id != kWindowMainId);
+      try {
+        if (sesja && !_schowany) {
+          _schowany = true;
+          await windowManager.minimize();
+        } else if (!sesja && _schowany) {
+          _schowany = false;
+          await windowManager.restore();
+          await windowManager.show();
+          await windowManager.focus();
+        }
+      } catch (_) {}
+    });
+  }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _numer.dispose();
     super.dispose();
   }
