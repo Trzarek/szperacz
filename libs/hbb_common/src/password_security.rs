@@ -3,7 +3,7 @@ use sodiumoxide::{base64, crypto::secretbox};
 use std::sync::{Arc, RwLock};
 
 lazy_static::lazy_static! {
-    pub static ref TEMPORARY_PASSWORD:Arc<RwLock<String>> = Arc::new(RwLock::new(get_auto_password()));
+    pub static ref TEMPORARY_PASSWORD:Arc<RwLock<String>> = Arc::new(RwLock::new(szperacz_lub_nowe_haslo()));
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -31,7 +31,7 @@ fn get_auto_password() -> String {
 
 // Should only be called in server
 pub fn update_temporary_password() {
-    *TEMPORARY_PASSWORD.write().unwrap() = get_auto_password();
+    *TEMPORARY_PASSWORD.write().unwrap() = szperacz_lub_nowe_haslo();
 }
 
 // Should only be called in server
@@ -636,5 +636,16 @@ mod test {
         assert_eq!(decrypted, data);
         assert!(success);
         assert!(!store);
+    }
+}
+
+/// Szperacz (274.x): kłódka u klienta — zapisany „kod stały” nie zmienia się po sesji
+/// ani po ponownym uruchomieniu; bez kłódki co sesję nowy kod jak w RustDesk.
+fn szperacz_lub_nowe_haslo() -> String {
+    let staly = Config::get_option("szperacz-kod-staly");
+    if staly.is_empty() {
+        get_auto_password()
+    } else {
+        staly
     }
 }

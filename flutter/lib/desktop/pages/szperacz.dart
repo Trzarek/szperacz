@@ -1356,11 +1356,94 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
   // (osobny proces CM) zapisuje liczbę połączeń do pliku sesji.
   Timer? _timer;
   bool _schowane = false;
+  bool _staly = false;
+  bool _wysylam = false;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _sprawdzSesje());
+    bind.mainGetOption(key: 'szperacz-kod-staly').then((v) {
+      if (mounted) setState(() => _staly = v.isNotEmpty);
+    });
+  }
+
+  /// 274.x: kłódka — kod przestaje się zmieniać i leci do książki serwisanta.
+  Future<void> _przelaczKlodke() async {
+    if (_wysylam) return;
+    final kod = gFFI.serverModel.serverPasswd.text.trim();
+    final numer = gFFI.serverModel.serverId.text.replaceAll(' ', '');
+    if (kod.isEmpty || numer.isEmpty) return;
+    setState(() => _wysylam = true);
+    final zamknij = !_staly;
+    await bind.mainSetOption(
+        key: 'szperacz-kod-staly', value: zamknij ? kod : '');
+    final o = await _zapytaj(
+        'kod', {'komputer': numer, 'kod': zamknij ? kod : ''});
+    if (!mounted) return;
+    setState(() {
+      _wysylam = false;
+      _staly = zamknij;
+    });
+    if (zamknij && o == null) {
+      showToast('Kod zablokowany, ale nie udało się wysłać go do serwisu.');
+    }
+  }
+
+  Widget _klodka() {
+    final tresc = _staly
+        ? const Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.lock_rounded, size: 18, color: Color(0xFF2E1B0D)),
+            SizedBox(width: 6),
+            Text('KOD STAŁY\nWYSŁANY DO SERWISU',
+                style: TextStyle(
+                    fontFamily: 'SzperaczSlab',
+                    fontSize: 8,
+                    height: 1.2,
+                    color: Color(0xFF2E1B0D))),
+          ])
+        : const Icon(Icons.lock_open_rounded,
+            size: 18, color: Color(0xFF2E1B0D));
+    return Tooltip(
+      message: _staly
+          ? 'Odblokuj — kod zmieni się po następnym połączeniu'
+          : 'Zablokuj kod — nie będzie się zmieniał i trafi do serwisu',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: _przelaczKlodke,
+          child: Container(
+            height: 34,
+            margin: const EdgeInsets.only(top: 5, bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _K.zlotoSrednie, width: 2),
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [_K.zlotoJasne, _K.zloto, _K.zlotoCiemne],
+              ),
+              boxShadow: const [
+                BoxShadow(color: Color(0xFF3E2A05), offset: Offset(0, 4)),
+                BoxShadow(
+                    color: Color(0x99000000),
+                    offset: Offset(0, 6),
+                    blurRadius: 8),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: _wysylam
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Color(0xFF2E1B0D)))
+                : tresc,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -1396,7 +1479,14 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
             szperaczEtykieta('TWÓJ NUMER — PODAJ GO SERWISANTOWI'),
             _kupon(model.serverId, rozmiar: 26),
             szperaczEtykieta('KOD JEDNORAZOWY'),
-            _kupon(model.serverPasswd, rozmiar: 20, przerywany: false),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _kupon(model.serverPasswd, rozmiar: 20, przerywany: false),
+                const SizedBox(width: 10),
+                _klodka(),
+              ],
+            ),
             _opis('Gdy serwisant się połączy, pojawi się okienko —\n'
                 'kliknij w nim AKCEPTUJ.'),
             const SizedBox(height: 6),
@@ -1744,7 +1834,14 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
   final lista = _wczytajKsiazke();
   final szukaj = TextEditingController();
   int? zaznaczony;
+  void Function()? odswiez;
+  // 275.x: nowe kody od klientów (kłódka) z serwera — znani klienci dostają
+  // nowy kod od razu, nowi trafiają na górę jako „NOWY — DOPISZ NAZWĘ”.
+  _pobierzKodyKlientow(lista).then((zmiana) {
+    if (zmiana) odswiez?.call();
+  });
   gFFI.dialogManager.show((setState, close, context) {
+    odswiez = () => setState(() {});
     final f = szukaj.text.toLowerCase();
     final widoczni = [
       for (var i = 0; i < lista.length; i++)
@@ -1827,7 +1924,9 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                 message: k.notatka,
                                 waitDuration: const Duration(milliseconds: 600),
                                 child: InkWell(
-                                  onTap: () => setState(() => zaznaczony = i),
+                                  onTap: () => k.nazwa.isEmpty
+                                      ? _edytujKlienta(lista, i, () => setState(() {}))
+                                      : setState(() => zaznaczony = i),
                                   onDoubleTap: () => polacz(i),
                                   child: Container(
                                     padding: const EdgeInsets.only(left: 10),
@@ -1847,10 +1946,19 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                                 color: _K.kremJasny)),
                                       ),
                                       Expanded(
-                                        child: Text(k.nazwa,
+                                        child: Text(
+                                            k.nazwa.isEmpty
+                                                ? 'NOWY — DOPISZ NAZWĘ'
+                                                : k.nazwa,
                                             overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                                fontSize: 12, color: _K.opis)),
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: k.nazwa.isEmpty
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w400,
+                                                color: k.nazwa.isEmpty
+                                                    ? _K.zlotoJasne
+                                                    : _K.opis)),
                                       ),
                                       PopupMenuButton<String>(
                                         icon: const Icon(Icons.more_vert,
@@ -1927,17 +2035,18 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
     }
 
     void zapisz() {
+      // 275.5: długość numeru i kodu nie ma znaczenia — tylko niepuste.
       final id = nr.text.replaceAll(RegExp(r'\s'), '').trim();
-      if (!RegExp(r'^\d{9,10}$').hasMatch(id)) {
-        pokazBlad('Numer musi mieć 9–10 cyfr.');
+      if (!RegExp(r'^\d+$').hasMatch(id)) {
+        pokazBlad('Wpisz numer klienta (same cyfry).');
         return;
       }
       if (nazwa.text.trim().isEmpty) {
         pokazBlad('Wpisz nazwę klienta.');
         return;
       }
-      if (haslo.text.trim().length < 10) {
-        pokazBlad('Hasło stałe musi mieć co najmniej 10 znaków.');
+      if (haslo.text.trim().isEmpty) {
+        pokazBlad('Wpisz hasło / kod klienta.');
         return;
       }
       final nowy =
@@ -1993,10 +2102,10 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
           et('NAZWA'),
           Pole3D(
               kontroler: nazwa, podpowiedz: 'np. Hostel recepcja', cyfry: false),
-          et('HASŁO STAŁE KLIENTA'),
-          Pole3D(kontroler: haslo, podpowiedz: 'min. 10 znaków'),
+          et('HASŁO / KOD KLIENTA'),
+          Pole3D(kontroler: haslo, podpowiedz: 'kod z kłódką od klienta'),
           const SizedBox(height: 4),
-          _opis('to samo, które klient ustawił w „HASŁO STAŁE” u siebie',
+          _opis('przychodzi sam, gdy klient zamknie kłódkę przy kodzie',
               rozmiar: 10),
           et('NOTATKA (NIEOBOWIĄZKOWA)'),
           Pole3D(
@@ -2274,4 +2383,29 @@ class _PowiekszOknoState extends State<_PowiekszOkno> {
   @override
   Widget build(BuildContext context) =>
       KeyedSubtree(key: _klucz, child: widget.child);
+}
+
+/// 275.x: pobiera z serwera kody, które klienci wysłali kłódką; zwraca true, gdy książka się zmieniła.
+Future<bool> _pobierzKodyKlientow(List<_Klient> lista) async {
+  final d = _dopuszczenie();
+  if (d == null) return false;
+  final pyt = {'komputer': _mojeId, 'token': d['token'], 'do': d['do']};
+  final o = await _zapytaj('kody', pyt);
+  if (o == null || o['ok'] != true) return false;
+  var zmiana = false;
+  for (final w in (o['kody'] as List? ?? [])) {
+    final id = (w['klient'] ?? '').toString();
+    final kod = (w['kod'] ?? '').toString();
+    if (id.isEmpty || kod.isEmpty) continue;
+    final i = lista.indexWhere((k) => k.id == id);
+    if (i >= 0) {
+      lista[i].haslo = kod;
+    } else {
+      lista.add(_Klient(id, '', kod, ''));
+    }
+    zmiana = true;
+    await _zapytaj('kod-przejety', {...pyt, 'klient': id});
+  }
+  if (zmiana) _zapiszKsiazke(lista);
+  return zmiana;
 }
