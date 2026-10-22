@@ -23,6 +23,7 @@ import 'package:flutter_hbb/web/dummy.dart'
 import '../../consts.dart';
 import '../../desktop/widgets/material_mod_popup_menu.dart' as mod_menu;
 import '../../common.dart';
+import 'szperacz.dart' show SzperaczTlo;
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import '../widgets/popup_menu.dart';
@@ -163,8 +164,22 @@ class _FileManagerPageState extends State<FileManagerPage>
     return Overlay(key: _overlayKeyState.key, initialEntries: [
       OverlayEntry(builder: (_) {
         return willPopScope(Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: Row(
+          backgroundColor: Colors.transparent,
+          // Szperacz (236.1): zielone tło, rdzawa rama, ciemne kolumny.
+          body: SzperaczTlo(
+              child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFC9A227), width: 4),
+              image: const DecorationImage(
+                image: AssetImage('assets/szperacz_rdza.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Theme(
+              data: MyTheme.darkTheme,
+              child: Row(
             children: [
               if (!isWeb)
                 Flexible(
@@ -177,7 +192,7 @@ class _FileManagerPageState extends State<FileManagerPage>
                       model.remoteController, _ffi, _mouseFocusScope))),
               Flexible(flex: 2, child: statusList())
             ],
-          ),
+          )))),
         ));
       })
     ]);
@@ -477,7 +492,12 @@ class _FileManagerViewState extends State<FileManagerView> {
   Widget build(BuildContext context) {
     _handleColumnPorportions();
     return Container(
-      margin: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xBFC9A227)),
+        color: const Color(0xEB080402),
+      ),
       padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

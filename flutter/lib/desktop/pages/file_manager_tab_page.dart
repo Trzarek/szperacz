@@ -64,6 +64,12 @@ class _FileManagerTabPageState extends State<FileManagerTabPage> {
   @override
   void initState() {
     super.initState();
+    // Szperacz (236.1): okno plików otwiera się na całym ekranie (z możliwością minimalizacji).
+    Future.delayed(const Duration(milliseconds: 800), () async {
+      try {
+        await WindowController.fromWindowId(windowId()).maximize();
+      } catch (_) {}
+    });
 
     rustDeskWinManager.setMethodHandler((call, fromWindowId) async {
       debugPrint(

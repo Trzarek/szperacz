@@ -594,7 +594,17 @@ class _DesktopTabState extends State<DesktopTab>
 
   Widget _buildBar() {
     final isIncomingHomePage = bind.isIncomingOnly() && isInHomePage();
-    return Row(
+    // Szperacz (267.1): ciemny rdzawy pasek kart ze złotą linią u dołu.
+    return Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/szperacz_rdza.png'),
+            fit: BoxFit.cover,
+          ),
+          border:
+              Border(bottom: BorderSide(color: Color(0xFFC9A227), width: 3)),
+        ),
+        child: Row(
       children: [
         Expanded(
             child: GestureDetector(
@@ -695,7 +705,7 @@ class _DesktopTabState extends State<DesktopTab>
           labelGetter: labelGetter,
         ).paddingOnly(left: 10)
       ],
-    );
+    ));
   }
 }
 
@@ -1455,29 +1465,23 @@ class TabbarTheme extends ThemeExtension<TabbarTheme> {
       required this.closeHoverColor,
       required this.selectedTabBackgroundColor});
 
-  static const light = TabbarTheme(
-      selectedTabIconColor: MyTheme.accent,
-      unSelectedTabIconColor: Color.fromARGB(255, 162, 203, 241),
-      selectedTextColor: Colors.black,
-      unSelectedTextColor: Color.fromARGB(255, 112, 112, 112),
-      selectedIconColor: Color.fromARGB(255, 26, 26, 26),
-      unSelectedIconColor: Color.fromARGB(255, 96, 96, 96),
-      dividerColor: Color.fromARGB(255, 238, 238, 238),
-      hoverColor: Colors.white54,
-      closeHoverColor: Colors.white,
-      selectedTabBackgroundColor: Colors.white54);
+  // Szperacz (267.2): karty w kolorach programu niezależnie od motywu —
+  // aktywna złota z ciemnym napisem, pozostałe kremowe napisy na rdzy.
+  static const _szperacz = TabbarTheme(
+      selectedTabIconColor: Color(0xFF2E1B0D),
+      unSelectedTabIconColor: Color(0xFFF2D77A),
+      selectedTextColor: Color(0xFF2E1B0D),
+      unSelectedTextColor: Color(0xFFF6E9C8),
+      selectedIconColor: Color(0xFF2E1B0D),
+      unSelectedIconColor: Color(0xFFF2D77A),
+      dividerColor: Color(0x80C9A227),
+      hoverColor: Color(0x40C9A227),
+      closeHoverColor: Color(0xFFC02C2C),
+      selectedTabBackgroundColor: Color(0xFFC9A227));
 
-  static const dark = TabbarTheme(
-      selectedTabIconColor: MyTheme.accent,
-      unSelectedTabIconColor: Color.fromARGB(255, 30, 65, 98),
-      selectedTextColor: Colors.white,
-      unSelectedTextColor: Color.fromARGB(255, 192, 192, 192),
-      selectedIconColor: Color.fromARGB(255, 192, 192, 192),
-      unSelectedIconColor: Color.fromARGB(255, 255, 255, 255),
-      dividerColor: Color.fromARGB(255, 64, 64, 64),
-      hoverColor: Colors.black26,
-      closeHoverColor: Colors.black,
-      selectedTabBackgroundColor: Colors.black26);
+  static const light = _szperacz;
+
+  static const dark = _szperacz;
 
   @override
   ThemeExtension<TabbarTheme> copyWith({
