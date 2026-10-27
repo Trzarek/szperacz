@@ -21,12 +21,9 @@ pub enum ApproveMode {
 }
 
 fn get_auto_password() -> String {
-    let len = temporary_password_length();
-    if Config::get_bool_option(crate::config::keys::OPTION_ALLOW_NUMERNIC_ONE_TIME_PASSWORD) {
-        Config::get_auto_numeric_password(len)
-    } else {
-        Config::get_auto_password(len)
-    }
+    // Szperacz (368.1): kod jednorazowy = 4 cyfry (łatwy do podyktowania przez telefon).
+    // Ochrona: ograniczenie prób logowania w serwerze + klient musi kliknąć AKCEPTUJ.
+    Config::get_auto_numeric_password(4)
 }
 
 // Should only be called in server

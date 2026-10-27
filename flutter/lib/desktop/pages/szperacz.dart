@@ -642,7 +642,11 @@ class Pole3D extends StatelessWidget {
     this.autoFocus = false,
     this.onSubmitted,
     this.onChanged,
+    this.tylkoCyfry = false,
   }) : super(key: key);
+
+  /// 368.2: pole przyjmuje wyłącznie cyfry (kod od klienta).
+  final bool tylkoCyfry;
 
   @override
   Widget build(BuildContext context) {
@@ -673,6 +677,9 @@ class Pole3D extends StatelessWidget {
           autofocus: autoFocus,
           autocorrect: false,
           enableSuggestions: false,
+          keyboardType: tylkoCyfry ? TextInputType.number : null,
+          inputFormatters:
+              tylkoCyfry ? [FilteringTextInputFormatter.digitsOnly] : null,
           obscureText: false,
           textAlign: duze ? TextAlign.center : TextAlign.left,
           onSubmitted: onSubmitted,
@@ -866,7 +873,8 @@ Widget szperaczPoleKodu({
       const SizedBox(height: 8),
       Pole3D(
         kontroler: kontroler,
-        podpowiedz: 'kod',
+        podpowiedz: '4 cyfry',
+        tylkoCyfry: true,
         duze: true,
         autoFocus: autoFocus,
         onSubmitted: (_) => onSubmit(),
