@@ -5,6 +5,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_hbb/desktop/pages/szperacz_skorka.dart';
+export 'package:flutter_hbb/desktop/pages/szperacz_skorka.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart' hide Dialog;
@@ -34,38 +37,38 @@ String get szperaczOpisWersji =>
 // ───────────────────────────── kolory ─────────────────────────────
 
 class _K {
-  static const butelkaCiemna = Color(0xFF04190F);
-  static const butelka = Color(0xFF0B3A24);
-  static const butelkaJasna = Color(0xFF17603C);
-  static const refleks = Color(0xFF2E8A5C);
-  static const krem = Color(0xFFF3E7C9);
-  static const kremJasny = Color(0xFFFFF3D6);
-  static const napis = Color(0xFFF0D9A8);
-  static const opis = Color(0xFFEAD7B0);
-  static const zloto = Color(0xFFC9A227);
-  static const zlotoJasne = Color(0xFFF2D77A);
-  static const zlotoBlysk = Color(0xFFFBE8A0);
-  static const zlotoSrednie = Color(0xFFE0BC45);
-  static const zlotoCiemne = Color(0xFF8C6D12);
-  static const zlotoBraz = Color(0xFF5E4709);
-  static const zlotoCien = Color(0xFF3A2A06);
-  static const tusz = Color(0xFF2A170C);
-  static const czerwien = Color(0xFF9E1B1B);
+  static Color get butelkaCiemna => sk(0xFF04190F);
+  static Color get butelka => sk(0xFF0B3A24);
+  static Color get butelkaJasna => sk(0xFF17603C);
+  static Color get refleks => sk(0xFF2E8A5C);
+  static Color get krem => sk(0xFFF3E7C9);
+  static Color get kremJasny => sk(0xFFFFF3D6);
+  static Color get napis => sk(0xFFF0D9A8);
+  static Color get opis => sk(0xFFEAD7B0);
+  static Color get zloto => sk(0xFFC9A227);
+  static Color get zlotoJasne => sk(0xFFF2D77A);
+  static Color get zlotoBlysk => sk(0xFFFBE8A0);
+  static Color get zlotoSrednie => sk(0xFFE0BC45);
+  static Color get zlotoCiemne => sk(0xFF8C6D12);
+  static Color get zlotoBraz => sk(0xFF5E4709);
+  static Color get zlotoCien => sk(0xFF3A2A06);
+  static Color get tusz => sk(0xFF2A170C);
+  static Color get czerwien => sk(0xFF9E1B1B);
   // Tekst wpisywany w pola — w kolorze złotej ramki (ciemniejszy odcień, czytelny na kremie).
-  static const wpis = Color(0xFFA58219);
+  static Color get wpis => sk(0xFFA58219);
 }
 
 /// Warstwy wytłoczenia napisów 3D (od góry do dołu).
-const _warstwy = [
-  Color(0xFFE8D39A),
-  Color(0xFFD9BC5C),
-  Color(0xFFC9A227),
-  Color(0xFFA58219),
-  Color(0xFF7C5F10),
-  Color(0xFF4F3B08),
+List<Color> get _warstwy => [
+  sk(0xFFE8D39A),
+  sk(0xFFD9BC5C),
+  sk(0xFFC9A227),
+  sk(0xFFA58219),
+  sk(0xFF7C5F10),
+  sk(0xFF4F3B08),
 ];
 
-const _gradientZloty = LinearGradient(
+LinearGradient get _gradientZloty => LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
   colors: [_K.zlotoBlysk, _K.zlotoSrednie, _K.zloto, _K.zlotoCiemne],
@@ -82,7 +85,7 @@ class SzperaczTlo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             _K.butelkaCiemna,
@@ -131,40 +134,38 @@ class SzperaczOkno extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: _K.zloto, width: 4),
-              image: const DecorationImage(
-                image: AssetImage('assets/szperacz_rdza.png'),
-                fit: BoxFit.cover,
-              ),
-              boxShadow: const [
+              image: szperaczTekstura(),
+                color: szperaczKolorOkna(),
+              boxShadow: [
                 BoxShadow(color: _K.zlotoCiemne, offset: Offset(0, 3)),
                 BoxShadow(color: _K.zlotoBraz, offset: Offset(0, 6)),
                 BoxShadow(
-                    color: Color(0xA6000000),
+                    color: sk(0xA6000000),
                     offset: Offset(0, 12),
                     blurRadius: 22),
               ],
             ),
             child: Container(
-              margin: const EdgeInsets.all(7),
+              margin: EdgeInsets.all(7),
               padding: padding,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(7),
-                border: Border.all(color: const Color(0xB3C9A227), width: 1),
+                border: Border.all(color: sk(0xB3C9A227), width: 1),
                 // Wewnętrzny cień — rdza „wgłębiona” w złotą ramę.
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x99000000),
-                    Color(0x00000000),
-                    Color(0x00000000),
-                    Color(0x40000000),
+                    sk(0x99000000),
+                    sk(0x00000000),
+                    sk(0x00000000),
+                    sk(0x40000000),
                   ],
                   stops: [0.0, 0.05, 0.92, 1.0],
                 ),
               ),
               child: DefaultTextStyle(
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'SzperaczSerif',
                   color: _K.krem,
                   fontSize: 13,
@@ -178,7 +179,7 @@ class SzperaczOkno extends StatelessWidget {
                       ? CrossAxisAlignment.stretch
                       : CrossAxisAlignment.center,
                   children: [
-                    const SzperaczWstegaNowejWersji(),
+                    SzperaczWstegaNowejWersji(),
                     child,
                     if (wersja) _stopkaWersji(),
                   ],
@@ -186,7 +187,7 @@ class SzperaczOkno extends StatelessWidget {
               ),
             ),
           ),
-          if (stempel)
+          if (stempel && szperaczSkorka.value.stempel)
             Positioned(
               top: -26,
               right: -22,
@@ -208,11 +209,11 @@ class SzperaczOkno extends StatelessWidget {
 }
 
 Widget _stopkaWersji() => Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: EdgeInsets.only(top: 12),
       child: Text(
         szperaczOpisWersji,
         textAlign: TextAlign.center,
-        style: const TextStyle(
+        style: TextStyle(
             fontFamily: 'SzperaczSerif', fontSize: 10, color: _K.opis),
       ),
     );
@@ -252,9 +253,9 @@ class Napis3D extends StatelessWidget {
                 style: styl(
                   _warstwy[((i - 1) * (_warstwy.length - 1) / (glebokosc - 1 == 0 ? 1 : glebokosc - 1)).round()],
                   cienie: i == glebokosc
-                      ? const [
+                      ? [
                           Shadow(
-                              color: Color(0xB3000000),
+                              color: sk(0xB3000000),
                               offset: Offset(0, 2),
                               blurRadius: 8)
                         ]
@@ -275,15 +276,15 @@ Widget szperaczEtykieta(String tekst, {TextAlign align = TextAlign.center}) =>
     Text(
       tekst,
       textAlign: align,
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: 'SzperaczSlab',
         fontSize: 10,
         letterSpacing: 2,
         color: _K.napis,
         shadows: [
-          Shadow(color: Color(0xFF6B4E0D), offset: Offset(0, 1)),
+          Shadow(color: sk(0xFF6B4E0D), offset: Offset(0, 1)),
           Shadow(color: _K.zlotoCien, offset: Offset(0, 2)),
-          Shadow(color: Color(0xCC000000), offset: Offset(0, 3), blurRadius: 3),
+          Shadow(color: sk(0xCC000000), offset: Offset(0, 3), blurRadius: 3),
         ],
       ),
     );
@@ -312,18 +313,18 @@ class SzperaczWstega extends StatelessWidget {
             child: Container(
               width: 24,
               height: 24,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFFA58219), _K.zlotoBraz],
+                  colors: [sk(0xFFA58219), _K.zlotoBraz],
                 ),
               ),
             ),
           ),
         );
     return Padding(
-      padding: const EdgeInsets.only(top: 6, bottom: 10),
+      padding: EdgeInsets.only(top: 6, bottom: 10),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -331,13 +332,13 @@ class SzperaczWstega extends StatelessWidget {
           Positioned(left: -14, top: 8, child: ogon(false)),
           Positioned(right: -14, top: 8, child: ogon(true)),
           Container(
-            padding: const EdgeInsets.all(3),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.all(3),
+            decoration: BoxDecoration(
               gradient: _gradientZloty,
               boxShadow: [
-                BoxShadow(color: Color(0xFF4F3B08), offset: Offset(0, 4)),
+                BoxShadow(color: sk(0xFF4F3B08), offset: Offset(0, 4)),
                 BoxShadow(
-                    color: Color(0xB3000000),
+                    color: sk(0xB3000000),
                     offset: Offset(0, 7),
                     blurRadius: 8),
               ],
@@ -345,14 +346,14 @@ class SzperaczWstega extends StatelessWidget {
             child: Container(
               padding:
                   EdgeInsets.symmetric(horizontal: 22, vertical: cyfry ? 2 : 4),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFFFFFDF5),
-                    Color(0xFFF6EBD0),
-                    Color(0xFFCDB383)
+                    sk(0xFFFFFDF5),
+                    sk(0xFFF6EBD0),
+                    sk(0xFFCDB383)
                   ],
                   stops: [0.0, 0.45, 1.0],
                 ),
@@ -360,18 +361,18 @@ class SzperaczWstega extends StatelessWidget {
               child: Text(
                 tekst,
                 style: cyfry
-                    ? const TextStyle(
+                    ? TextStyle(
                         fontFamily: 'SzperaczMono',
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                         letterSpacing: 1,
-                        color: Color(0xFF2E1B0D),
+                        color: sk(0xFF2E1B0D),
                         shadows: [])
-                    : const TextStyle(
+                    : TextStyle(
                         fontFamily: 'SzperaczSlab',
                         fontSize: 12,
                         letterSpacing: 3,
-                        color: Color(0xFF2E1B0D),
+                        color: sk(0xFF2E1B0D),
                         shadows: [
                           Shadow(color: Colors.white, offset: Offset(0, 1))
                         ]),
@@ -403,12 +404,12 @@ Widget _naglowek(String wstega, {bool cyfry = false, String? podpis}) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         szperaczEtykieta('★ MINITEL · WROCŁAW ★'),
-        const SizedBox(height: 2),
-        const Napis3D('SZPERACZ', rozmiar: 30),
+        SizedBox(height: 2),
+        Napis3D('SZPERACZ', rozmiar: 30),
         SzperaczWstega(wstega, cyfry: cyfry),
         if (podpis != null) ...[
           szperaczEtykieta(podpis),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
         ],
       ],
     );
@@ -453,48 +454,51 @@ class _Klawisz3DState extends State<Klawisz3D> {
   Widget build(BuildContext context) {
     final r = widget.aktywny ? RodzajKlawisza.zloty : widget.rodzaj;
     late final List<Color> g;
-    late final Color podstawa1, podstawa2, napis;
+    late final Color podstawa1, podstawa2;
+    late Color napis;
     switch (r) {
       case RodzajKlawisza.zielony:
-        g = const [
-          Color(0xFF5CC08A),
-          Color(0xFF1F8A50),
-          Color(0xFF0B5A33),
-          Color(0xFF053A1D)
+        g = [
+          sk(0xFF5CC08A),
+          sk(0xFF1F8A50),
+          sk(0xFF0B5A33),
+          sk(0xFF053A1D)
         ];
-        podstawa1 = const Color(0xFF02200F);
-        podstawa2 = const Color(0xFF011208);
+        podstawa1 = sk(0xFF02200F);
+        podstawa2 = sk(0xFF011208);
         napis = Colors.white;
         break;
       case RodzajKlawisza.czerwony:
-        g = const [
-          Color(0xFFF07070),
-          Color(0xFFC02C2C),
-          Color(0xFF9E1B1B),
-          Color(0xFF5E0B0B)
+        g = [
+          sk(0xFFF07070),
+          sk(0xFFC02C2C),
+          sk(0xFF9E1B1B),
+          sk(0xFF5E0B0B)
         ];
-        podstawa1 = const Color(0xFF4A0A0A);
-        podstawa2 = const Color(0xFF2A0505);
+        podstawa1 = sk(0xFF4A0A0A);
+        podstawa2 = sk(0xFF2A0505);
         napis = Colors.white;
         break;
       case RodzajKlawisza.zloty:
-        g = const [_K.zlotoJasne, _K.zloto, _K.zlotoCiemne, _K.zlotoBraz];
-        podstawa1 = const Color(0xFF3E2A05);
-        podstawa2 = const Color(0xFF241802);
-        napis = const Color(0xFF2E1B0D);
+        g = [_K.zlotoJasne, _K.zloto, _K.zlotoCiemne, _K.zlotoBraz];
+        podstawa1 = sk(0xFF3E2A05);
+        podstawa2 = sk(0xFF241802);
+        napis = sk(0xFF2E1B0D);
         break;
       case RodzajKlawisza.ciemny:
-        g = const [
-          Color(0xFF3A2716),
-          Color(0xFF1F140A),
-          Color(0xFF140C06),
-          Color(0xFF080402)
+        g = [
+          sk(0xFF3A2716),
+          sk(0xFF1F140A),
+          sk(0xFF140C06),
+          sk(0xFF080402)
         ];
-        podstawa1 = const Color(0xFF050301);
+        podstawa1 = sk(0xFF050301);
         podstawa2 = Colors.black;
-        napis = const Color(0xFFF6E9C8);
+        napis = sk(0xFFF6E9C8);
         break;
     }
+    // 389.x: napis czytelny w każdej skórce — na jasnym klawiszu ciemny, na ciemnym jasny.
+    napis = g[1].computeLuminance() > 0.42 ? _K.tusz : Colors.white;
     final przesuniecie = _wcisniety ? 4.0 : 0.0;
     final tresc = Row(
       mainAxisAlignment:
@@ -504,7 +508,7 @@ class _Klawisz3DState extends State<Klawisz3D> {
           Icon(widget.ikona,
               size: widget.rozmiarNapisu + 5,
               color: r == RodzajKlawisza.ciemny ? _K.zlotoJasne : napis),
-          if (widget.tekst.isNotEmpty) const SizedBox(width: 6),
+          if (widget.tekst.isNotEmpty) SizedBox(width: 6),
         ],
         if (widget.tekst.isNotEmpty)
           Flexible(
@@ -522,8 +526,8 @@ class _Klawisz3DState extends State<Klawisz3D> {
                   shadows: [
                     Shadow(
                         color: r == RodzajKlawisza.zloty
-                            ? const Color(0x80FFFFFF)
-                            : const Color(0x99000000),
+                            ? sk(0x80FFFFFF)
+                            : sk(0x99000000),
                         offset: Offset(0, r == RodzajKlawisza.zloty ? 1 : -1)),
                   ],
                 ),
@@ -545,10 +549,10 @@ class _Klawisz3DState extends State<Klawisz3D> {
         onTapUp: (_) => setState(() => _wcisniety = false),
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 60),
+          duration: Duration(milliseconds: 60),
           height: widget.wysokosc,
           transform: Matrix4.translationValues(0, przesuniecie, 0),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(9),
             border: Border.all(
@@ -560,15 +564,15 @@ class _Klawisz3DState extends State<Klawisz3D> {
               colors: _najechany
                   ? g.map((c) => Color.lerp(c, Colors.white, 0.08)!).toList()
                   : g,
-              stops: const [0.0, 0.3, 0.7, 1.0],
+              stops: [0.0, 0.3, 0.7, 1.0],
             ),
             boxShadow: _wcisniety
-                ? [BoxShadow(color: podstawa1, offset: const Offset(0, 1))]
+                ? [BoxShadow(color: podstawa1, offset: Offset(0, 1))]
                 : [
-                    BoxShadow(color: podstawa1, offset: const Offset(0, 5)),
-                    BoxShadow(color: podstawa2, offset: const Offset(0, 7)),
-                    const BoxShadow(
-                        color: Color(0xB3000000),
+                    BoxShadow(color: podstawa1, offset: Offset(0, 5)),
+                    BoxShadow(color: podstawa2, offset: Offset(0, 7)),
+                    BoxShadow(
+                        color: sk(0xB3000000),
                         offset: Offset(0, 10),
                         blurRadius: 12),
                   ],
@@ -576,14 +580,14 @@ class _Klawisz3DState extends State<Klawisz3D> {
           // Połysk u góry i cień u dołu (wrażenie wypukłości).
           foregroundDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(7),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0x73FFFFFF),
-                Color(0x00FFFFFF),
-                Color(0x00000000),
-                Color(0x66000000),
+                sk(0x73FFFFFF),
+                sk(0x00FFFFFF),
+                sk(0x00000000),
+                sk(0x66000000),
               ],
               stops: [0.0, 0.12, 0.85, 1.0],
             ),
@@ -593,7 +597,7 @@ class _Klawisz3DState extends State<Klawisz3D> {
       ),
     );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
+      padding: EdgeInsets.only(bottom: 9),
       child: widget.podpowiedz == null
           ? przycisk
           : Tooltip(message: widget.podpowiedz!, child: przycisk),
@@ -609,7 +613,7 @@ Widget szperaczKlawisz({
   bool zloty = false,
 }) =>
     Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: EdgeInsets.symmetric(horizontal: 4),
       child: Klawisz3D(
         tekst: tekst,
         onTap: onTap,
@@ -651,24 +655,24 @@ class Pole3D extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(3),
+      padding: EdgeInsets.all(3),
       decoration: BoxDecoration(
         gradient: _gradientZloty,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(color: _K.zlotoBraz, offset: Offset(0, 3)),
           BoxShadow(color: _K.zlotoCien, offset: Offset(0, 5)),
           BoxShadow(
-              color: Color(0xB3000000), offset: Offset(0, 8), blurRadius: 10),
+              color: sk(0xB3000000), offset: Offset(0, 8), blurRadius: 10),
         ],
       ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFD9C79F), Color(0xFFFFFBEE), Color(0xFFF7EDD3)],
+            colors: [sk(0xFFD9C79F), sk(0xFFFFFBEE), sk(0xFFF7EDD3)],
             stops: [0.0, 0.25, 1.0],
           ),
         ),
@@ -690,16 +694,16 @@ class Pole3D extends StatelessWidget {
             fontSize: duze ? 24 : (cyfry ? 16 : 14),
             letterSpacing: duze ? 4 : (cyfry ? 1 : 0),
             color: _K.wpis,
-            shadows: const [],
+            shadows: [],
           ),
           cursorColor: _K.wpis,
           decoration: InputDecoration(
             isDense: true,
             border: InputBorder.none,
             hintText: podpowiedz,
-            hintStyle: const TextStyle(color: Color(0xFF8A7A5A), shadows: []),
+            hintStyle: TextStyle(color: sk(0xFF8A7A5A), shadows: []),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           ),
         ),
       ),
@@ -718,20 +722,20 @@ Widget _kupon(TextEditingController kontroler,
         showToast(translate('Copied'));
       },
       child: Container(
-        margin: const EdgeInsets.only(top: 5, bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        margin: EdgeInsets.only(top: 5, bottom: 10),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
           border: Border.all(color: _K.zloto, width: 2),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFFBEE), Color(0xFFF4E8C8)],
+            colors: [sk(0xFFFFFBEE), sk(0xFFF4E8C8)],
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(color: _K.zlotoBraz, offset: Offset(0, 3)),
             BoxShadow(
-                color: Color(0x99000000), offset: Offset(0, 5), blurRadius: 6),
+                color: sk(0x99000000), offset: Offset(0, 5), blurRadius: 6),
           ],
         ),
         child: SelectableText(
@@ -742,7 +746,7 @@ Widget _kupon(TextEditingController kontroler,
             fontSize: rozmiar,
             letterSpacing: przerywany ? 0 : 3,
             color: _K.tusz,
-            shadows: const [],
+            shadows: [],
           ),
         ),
       ),
@@ -760,18 +764,18 @@ class SzperaczSekcja extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.fromLTRB(14, 10, 14, 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xBFC9A227)),
-        gradient: const LinearGradient(
+        border: Border.all(color: sk(0xBFC9A227)),
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xEB080402), Color(0xE60E0804)],
+          colors: [sk(0xEB080402), sk(0xE60E0804)],
         ),
-        boxShadow: const [
-          BoxShadow(color: Color(0x80000000), offset: Offset(0, 3)),
+        boxShadow: [
+          BoxShadow(color: sk(0x80000000), offset: Offset(0, 3)),
         ],
       ),
       child: Column(
@@ -780,7 +784,7 @@ class SzperaczSekcja extends StatelessWidget {
         children: [
           if (tytul != null) ...[
             szperaczEtykieta(tytul!, align: TextAlign.left),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
           ],
           child,
         ],
@@ -814,17 +818,17 @@ class SzperaczDialog extends CustomAlertDialog {
     return CallbackShortcuts(
       bindings: {
         if (onEscape != null)
-          const SingleActivator(LogicalKeyboardKey.escape): onEscape!,
+          SingleActivator(LogicalKeyboardKey.escape): onEscape!,
       },
       // 289.1: zielone tło na całe okno — spod okienka nic nie prześwituje.
       child: Stack(children: [
-        const Positioned.fill(child: SzperaczTlo(child: SizedBox.expand())),
+        Positioned.fill(child: SzperaczTlo(child: SizedBox.expand())),
         Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        insetPadding: const EdgeInsets.all(24),
+        insetPadding: EdgeInsets.all(24),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 26, right: 22),
+          padding: EdgeInsets.only(top: 26, right: 22),
           child: _PowiekszOkno(child: SzperaczOkno(
             maxSzerokosc: szerokosc,
             child: Theme(
@@ -834,14 +838,14 @@ class SzperaczDialog extends CustomAlertDialog {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Napis3D(tytul, rozmiar: 19),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   tresc,
                   if (akcje.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Row(
                       children: [
                         for (var i = 0; i < akcje.length; i++) ...[
-                          if (i > 0) const SizedBox(width: 10),
+                          if (i > 0) SizedBox(width: 10),
                           Expanded(child: akcje[i]),
                         ],
                       ],
@@ -870,7 +874,7 @@ Widget szperaczPoleKodu({
     mainAxisSize: MainAxisSize.min,
     children: [
       szperaczEtykieta('WPISZ KOD Z EKRANU KLIENTA'),
-      const SizedBox(height: 8),
+      SizedBox(height: 8),
       Pole3D(
         kontroler: kontroler,
         podpowiedz: '4 cyfry',
@@ -879,7 +883,7 @@ Widget szperaczPoleKodu({
         autoFocus: autoFocus,
         onSubmitted: (_) => onSubmit(),
       ),
-      const SizedBox(height: 8),
+      SizedBox(height: 8),
       _opis('Kod zmienia się po każdej sesji.', rozmiar: 11),
     ],
   );
@@ -914,7 +918,7 @@ Future<void> _sprawdzWersje() async {
   try {
     final r = await http
         .get(Uri.parse(_adresWersji))
-        .timeout(const Duration(seconds: 15));
+        .timeout(Duration(seconds: 15));
     if (r.statusCode != 200) return;
     final j = jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>;
     final w = (j['wersja'] ?? '').toString();
@@ -934,7 +938,7 @@ void szperaczStartSprawdzaniaWersji() {
   if (_timerWersji != null) return;
   _sprawdzWersje();
   _timerWersji =
-      Timer.periodic(const Duration(hours: 24), (_) => _sprawdzWersje());
+      Timer.periodic(Duration(hours: 24), (_) => _sprawdzWersje());
 }
 
 /// Złota wstęga „NOWA WERSJA … JEST GOTOWA — POBIERZ” u góry każdego okna.
@@ -945,35 +949,35 @@ class SzperaczWstegaNowejWersji extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final n = _nowaWersja.value;
-      if (n == null) return const SizedBox.shrink();
+      if (n == null) return SizedBox.shrink();
       return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.only(bottom: 12),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
+          padding: EdgeInsets.fromLTRB(10, 6, 6, 6),
           decoration: BoxDecoration(
             gradient: _gradientZloty,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: _K.zlotoSrednie, width: 2),
-            boxShadow: const [
-              BoxShadow(color: Color(0xFF3E2A05), offset: Offset(0, 4)),
+            boxShadow: [
+              BoxShadow(color: sk(0xFF3E2A05), offset: Offset(0, 4)),
               BoxShadow(
-                  color: Color(0x99000000),
+                  color: sk(0x99000000),
                   offset: Offset(0, 6),
                   blurRadius: 8),
             ],
           ),
           child: Row(
             children: [
-              const Icon(Icons.card_giftcard, size: 16, color: Color(0xFF2E1B0D)),
-              const SizedBox(width: 8),
+              Icon(Icons.card_giftcard, size: 16, color: sk(0xFF2E1B0D)),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'NOWA WERSJA ${n.wersja} JEST GOTOWA',
                   textAlign: TextAlign.left,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontFamily: 'SzperaczSlab',
                       fontSize: 10,
-                      color: Color(0xFF2E1B0D),
+                      color: sk(0xFF2E1B0D),
                       shadows: []),
                 ),
               ),
@@ -1006,7 +1010,7 @@ void _potwierdzAktualizacje(_NowaWersja n) {
           _opis('Zaktualizować Szperacza do wersji ${n.wersja}?\n'
               'Program uruchomi się ponownie.'),
           if (polaczenia) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             _opis('Trwa połączenie — lepiej zaktualizować po jego zakończeniu.',
                 rozmiar: 11),
           ],
@@ -1040,7 +1044,7 @@ Future<void> _aktualizuj(_NowaWersja n) async {
   }
   gFFI.dialogManager.showLoading('Pobieranie wersji ${n.wersja}…');
   try {
-    final r = await http.get(Uri.parse(n.url)).timeout(const Duration(minutes: 5));
+    final r = await http.get(Uri.parse(n.url)).timeout(Duration(minutes: 5));
     if (r.statusCode != 200) throw 'HTTP ${r.statusCode}';
     final nowy = '$plik.nowy';
     await File(nowy).writeAsBytes(r.bodyBytes, flush: true);
@@ -1114,7 +1118,7 @@ class _DopasujOknoState extends State<_DopasujOkno> {
           return;
         }
         _ostatni = cel;
-        await windowManager.setMinimumSize(const Size(200, 200));
+        await windowManager.setMinimumSize(Size(200, 200));
         await windowManager.setSize(cel);
         await windowManager.center();
       } catch (_) {}
@@ -1128,7 +1132,7 @@ class _DopasujOknoState extends State<_DopasujOkno> {
       key: _obszar,
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(_margines),
+          padding: EdgeInsets.all(_margines),
           child: NotificationListener<SizeChangedLayoutNotification>(
             onNotification: (_) {
               _dopasuj();
@@ -1195,7 +1199,7 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
           child: Container(
             width: 30,
             height: 28,
-            margin: const EdgeInsets.only(left: 6),
+            margin: EdgeInsets.only(left: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: _K.zlotoSrednie, width: 2),
@@ -1211,51 +1215,51 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
 
   Widget _polePin() {
     return CallbackShortcuts(
-      bindings: {const SingleActivator(LogicalKeyboardKey.escape): _anuluj},
+      bindings: {SingleActivator(LogicalKeyboardKey.escape): _anuluj},
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 9),
+        padding: EdgeInsets.only(bottom: 9),
         child: Container(
           height: 44,
-          padding: const EdgeInsets.fromLTRB(10, 0, 6, 0),
+          padding: EdgeInsets.fromLTRB(10, 0, 6, 0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(9),
             border: Border.all(color: _K.zlotoSrednie, width: 2),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFFF07070),
-                Color(0xFFC02C2C),
-                Color(0xFF9E1B1B),
-                Color(0xFF5E0B0B)
+                sk(0xFFF07070),
+                sk(0xFFC02C2C),
+                sk(0xFF9E1B1B),
+                sk(0xFF5E0B0B)
               ],
               stops: [0.0, 0.3, 0.7, 1.0],
             ),
-            boxShadow: const [
-              BoxShadow(color: Color(0xFF4A0A0A), offset: Offset(0, 5)),
-              BoxShadow(color: Color(0xFF2A0505), offset: Offset(0, 7)),
+            boxShadow: [
+              BoxShadow(color: sk(0xFF4A0A0A), offset: Offset(0, 5)),
+              BoxShadow(color: sk(0xFF2A0505), offset: Offset(0, 7)),
               BoxShadow(
-                  color: Color(0xB3000000),
+                  color: sk(0xB3000000),
                   offset: Offset(0, 10),
                   blurRadius: 12),
             ],
           ),
           child: Row(
             children: [
-              const Text('PIN',
+              Text('PIN',
                   style: TextStyle(
                       fontFamily: 'SzperaczSlab',
                       fontSize: 11,
                       color: Colors.white)),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color(0xFFD9C79F), Color(0xFFFFFBEE)],
+                      colors: [sk(0xFFD9C79F), sk(0xFFFFFBEE)],
                       stops: [0.0, 0.3],
                     ),
                   ),
@@ -1266,7 +1270,7 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
                     obscuringCharacter: '●',
                     readOnly: _czekam,
                     onSubmitted: (_) => _wejdz(),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: 'SzperaczMono',
                         fontWeight: FontWeight.w700,
                         fontSize: 22,
@@ -1274,7 +1278,7 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
                         color: _K.wpis,
                         shadows: []),
                     cursorColor: _K.wpis,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       isDense: true,
                       border: InputBorder.none,
                       contentPadding:
@@ -1285,16 +1289,16 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
               ),
               _malyKlawisz(
                   Icons.arrow_forward_rounded,
-                  const [
-                    Color(0xFF5CC08A),
-                    Color(0xFF1F8A50),
-                    Color(0xFF053A1D)
+                  [
+                    sk(0xFF5CC08A),
+                    sk(0xFF1F8A50),
+                    sk(0xFF053A1D)
                   ],
                   Colors.white,
                   _wejdz),
               _malyKlawisz(
                   Icons.close_rounded,
-                  const [Color(0xFF3A2716), Color(0xFF140C06)],
+                  [sk(0xFF3A2716), sk(0xFF140C06)],
                   _K.zlotoJasne,
                   _anuluj),
             ],
@@ -1314,7 +1318,7 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
           children: [
             _naglowek('POMOC ZDALNA'),
             szperaczEtykieta('CO CHCESZ ZROBIĆ?'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Klawisz3D(
               tekst: 'KTOŚ ŁĄCZY SIĘ ZE MNĄ',
               ikona: Icons.download_rounded,
@@ -1322,7 +1326,7 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
               rozmiarNapisu: 11,
               onTap: () => szperaczTryb.value = 'klient',
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             if (_pin)
               _polePin()
             else
@@ -1339,11 +1343,11 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
               ),
             if (_komunikat.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 2),
+                padding: EdgeInsets.only(top: 2),
                 child: Text(_komunikat,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        color: _czekam ? _K.opis : const Color(0xFFFFB4A0),
+                        color: _czekam ? _K.opis : sk(0xFFFFB4A0),
                         fontWeight: FontWeight.w700,
                         fontSize: 11)),
               ),
@@ -1374,7 +1378,7 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _sprawdzSesje());
+    _timer = Timer.periodic(Duration(seconds: 1), (_) => _sprawdzSesje());
     bind.mainGetOption(key: 'szperacz-kod-staly').then((v) {
       if (mounted) setState(() => _staly = v.isNotEmpty);
     });
@@ -1404,18 +1408,18 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
 
   Widget _klodka() {
     final tresc = _staly
-        ? const Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.lock_rounded, size: 18, color: Color(0xFF2E1B0D)),
+        ? Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.lock_rounded, size: 18, color: sk(0xFF2E1B0D)),
             SizedBox(width: 6),
             Text('KOD STAŁY\nWYSŁANY DO SERWISU',
                 style: TextStyle(
                     fontFamily: 'SzperaczSlab',
                     fontSize: 8,
                     height: 1.2,
-                    color: Color(0xFF2E1B0D))),
+                    color: sk(0xFF2E1B0D))),
           ])
-        : const Icon(Icons.lock_open_rounded,
-            size: 18, color: Color(0xFF2E1B0D));
+        : Icon(Icons.lock_open_rounded,
+            size: 18, color: sk(0xFF2E1B0D));
     return Tooltip(
       message: _staly
           ? 'Odblokuj — kod zmieni się po następnym połączeniu'
@@ -1426,31 +1430,31 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
           onTap: _przelaczKlodke,
           child: Container(
             height: 34,
-            margin: const EdgeInsets.only(top: 5, bottom: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            margin: EdgeInsets.only(top: 5, bottom: 10),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: _K.zlotoSrednie, width: 2),
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [_K.zlotoJasne, _K.zloto, _K.zlotoCiemne],
               ),
-              boxShadow: const [
-                BoxShadow(color: Color(0xFF3E2A05), offset: Offset(0, 4)),
+              boxShadow: [
+                BoxShadow(color: sk(0xFF3E2A05), offset: Offset(0, 4)),
                 BoxShadow(
-                    color: Color(0x99000000),
+                    color: sk(0x99000000),
                     offset: Offset(0, 6),
                     blurRadius: 8),
               ],
             ),
             alignment: Alignment.center,
             child: _wysylam
-                ? const SizedBox(
+                ? SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Color(0xFF2E1B0D)))
+                        strokeWidth: 2, color: sk(0xFF2E1B0D)))
                 : tresc,
           ),
         ),
@@ -1495,13 +1499,13 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _kupon(model.serverPasswd, rozmiar: 20, przerywany: false),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 _klodka(),
               ],
             ),
             _opis('Gdy serwisant się połączy, pojawi się okienko —\n'
                 'kliknij w nim AKCEPTUJ.'),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             TextButton(
               onPressed: () => szperaczTryb.value = null,
               child: szperaczEtykieta('◀ WRÓĆ DO WYBORU'),
@@ -1571,12 +1575,12 @@ void szperaczUstawHasloStale({
     }
 
     return _Surowy(CallbackShortcuts(
-      bindings: {const SingleActivator(LogicalKeyboardKey.escape): close},
+      bindings: {SingleActivator(LogicalKeyboardKey.escape): close},
       child: Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 26, right: 22),
+          padding: EdgeInsets.only(top: 26, right: 22),
           child: _PowiekszOkno(child: SzperaczOkno(
             maxSzerokosc: 340,
             child: Theme(
@@ -1589,30 +1593,30 @@ void szperaczUstawHasloStale({
                   _opis('Z hasłem stałym serwisant MINITEL połączy się bez kodu '
                       'i bez klikania AKCEPTUJ. Połączenie zawsze widać na ekranie.',
                       rozmiar: 11),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   szperaczEtykieta('NOWE HASŁO', align: TextAlign.left),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   Pole3D(
                       kontroler: p0,
                       podpowiedz: 'min. 10 znaków',
                       autoFocus: true),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   szperaczEtykieta('POWTÓRZ HASŁO', align: TextAlign.left),
-                  const SizedBox(height: 5),
+                  SizedBox(height: 5),
                   Pole3D(
                       kontroler: p1,
                       podpowiedz: 'to samo hasło',
                       onSubmitted: (_) => ustaw()),
                   if (blad.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                      padding: EdgeInsets.only(top: 8),
                       child: Text(blad,
-                          style: const TextStyle(
-                              color: Color(0xFFFFB4A0),
+                          style: TextStyle(
+                              color: sk(0xFFFFB4A0),
                               fontWeight: FontWeight.w700,
                               fontSize: 11)),
                     ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(children: [
                     Expanded(
                         child: Klawisz3D(
@@ -1620,7 +1624,7 @@ void szperaczUstawHasloStale({
                             ikona: Icons.close_rounded,
                             rodzaj: RodzajKlawisza.czerwony,
                             onTap: close)),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                         child: Klawisz3D(
                             tekst: 'ZAPISZ',
@@ -1663,7 +1667,7 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 2), (_) async {
+    _timer = Timer.periodic(Duration(seconds: 2), (_) async {
       final sesja =
           rustDeskWinManager.getActiveWindows().any((id) => id != kWindowMainId);
       try {
@@ -1707,8 +1711,8 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
           mainAxisSize: MainAxisSize.min,
           children: [
             szperaczEtykieta('★ MINITEL · WROCŁAW ★'),
-            const SizedBox(height: 2),
-            const Napis3D('SZPERACZ', rozmiar: 30),
+            SizedBox(height: 2),
+            Napis3D('SZPERACZ', rozmiar: 30),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: model.serverId,
               builder: (_, w, __) => SzperaczWstega(
@@ -1716,69 +1720,69 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                   cyfry: true),
             ),
             szperaczEtykieta('MÓJ IDENTYFIKATOR'),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             // Zielony klawisz = pole „ID KLIENTA” (186.2).
             Container(
               height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(9),
                 border: Border.all(color: _K.zlotoSrednie, width: 2),
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFF5CC08A),
-                    Color(0xFF1F8A50),
-                    Color(0xFF0B5A33),
-                    Color(0xFF053A1D)
+                    sk(0xFF5CC08A),
+                    sk(0xFF1F8A50),
+                    sk(0xFF0B5A33),
+                    sk(0xFF053A1D)
                   ],
                   stops: [0.0, 0.3, 0.7, 1.0],
                 ),
-                boxShadow: const [
-                  BoxShadow(color: Color(0xFF02200F), offset: Offset(0, 5)),
-                  BoxShadow(color: Color(0xFF011208), offset: Offset(0, 7)),
+                boxShadow: [
+                  BoxShadow(color: sk(0xFF02200F), offset: Offset(0, 5)),
+                  BoxShadow(color: sk(0xFF011208), offset: Offset(0, 7)),
                   BoxShadow(
-                      color: Color(0xB3000000),
+                      color: sk(0xB3000000),
                       offset: Offset(0, 10),
                       blurRadius: 12),
                 ],
               ),
               child: Row(
                 children: [
-                  const Text('ID KLIENTA',
+                  Text('ID KLIENTA',
                       style: TextStyle(
                           fontFamily: 'SzperaczSlab',
                           fontSize: 10,
                           color: Colors.white)),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
-                        gradient: const LinearGradient(
+                        gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Color(0xFFD9C79F), Color(0xFFFFFBEE)],
+                          colors: [sk(0xFFD9C79F), sk(0xFFFFFBEE)],
                           stops: [0.0, 0.3],
                         ),
                       ),
                       child: TextField(
                         controller: _numer,
                         onSubmitted: (_) => _polacz(),
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontFamily: 'SzperaczMono',
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             color: _K.wpis,
                             shadows: []),
                         cursorColor: _K.wpis,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           isDense: true,
                           border: InputBorder.none,
                           hintText: '123456789',
                           hintStyle:
-                              TextStyle(color: Color(0xFF8A7A5A), shadows: []),
+                              TextStyle(color: sk(0xFF8A7A5A), shadows: []),
                           contentPadding:
                               EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         ),
@@ -1788,7 +1792,7 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
@@ -1797,7 +1801,7 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                       ikona: Icons.power_rounded,
                       onTap: _polacz),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 SizedBox(
                   width: 44,
                   child: Klawisz3D(
@@ -1906,10 +1910,10 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
             cyfry: false,
             onChanged: (_) => setState(() => zaznaczony = null),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xB3C9A227)),
+              border: Border.all(color: sk(0xB3C9A227)),
               borderRadius: BorderRadius.circular(6),
             ),
             clipBehavior: Clip.antiAlias,
@@ -1917,15 +1921,15 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
               children: [
                 Container(
                   height: 26,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: const BoxDecoration(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color(0xFFA58219), _K.zlotoBraz],
+                      colors: [sk(0xFFA58219), _K.zlotoBraz],
                     ),
                   ),
-                  child: const Row(children: [
+                  child: Row(children: [
                     SizedBox(
                         width: 100,
                         child: Text('NUMER',
@@ -1958,24 +1962,24 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                               final akt = zaznaczony == i;
                               return Tooltip(
                                 message: k.notatka,
-                                waitDuration: const Duration(milliseconds: 600),
+                                waitDuration: Duration(milliseconds: 600),
                                 child: InkWell(
                                   onTap: () => k.nazwa.isEmpty
                                       ? _edytujKlienta(lista, i, () => setState(() {}))
                                       : setState(() => zaznaczony = i),
                                   onDoubleTap: () => polacz(i),
                                   child: Container(
-                                    padding: const EdgeInsets.only(left: 10),
+                                    padding: EdgeInsets.only(left: 10),
                                     color: akt
-                                        ? const Color(0x80C9A227)
+                                        ? sk(0x80C9A227)
                                         : (n.isEven
-                                            ? const Color(0x4D000000)
-                                            : const Color(0x73000000)),
+                                            ? sk(0x4D000000)
+                                            : sk(0x73000000)),
                                     child: Row(children: [
                                       SizedBox(
                                         width: 100,
                                         child: Text(k.id,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontFamily: 'SzperaczMono',
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 13,
@@ -1997,7 +2001,7 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                                     : _K.opis)),
                                       ),
                                       PopupMenuButton<String>(
-                                        icon: const Icon(Icons.more_vert,
+                                        icon: Icon(Icons.more_vert,
                                             size: 16, color: _K.zlotoSrednie),
                                         padding: EdgeInsets.zero,
                                         onSelected: (v) {
@@ -2009,7 +2013,7 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                             setState(() => zaznaczony = null);
                                           }
                                         },
-                                        itemBuilder: (_) => const [
+                                        itemBuilder: (_) => [
                                           PopupMenuItem(
                                               value: 'zmien', child: Text('Zmień')),
                                           PopupMenuItem(
@@ -2107,7 +2111,7 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
     }
 
     Widget et(String t) => Padding(
-          padding: const EdgeInsets.only(top: 10, bottom: 5),
+          padding: EdgeInsets.only(top: 10, bottom: 5),
           child: szperaczEtykieta(t, align: TextAlign.left),
         );
     return SzperaczDialog(
@@ -2119,16 +2123,16 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
         children: [
           if (blad.isNotEmpty)
             Container(
-              margin: const EdgeInsets.only(top: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              margin: EdgeInsets.only(top: 4),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
               decoration: BoxDecoration(
-                color: const Color(0xCC5E0B0B),
+                color: sk(0xCC5E0B0B),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: _K.zlotoSrednie),
               ),
               child: Text(blad,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 12)),
@@ -2140,7 +2144,7 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
               kontroler: nazwa, podpowiedz: 'np. Hostel recepcja', cyfry: false),
           et('HASŁO / KOD KLIENTA'),
           Pole3D(kontroler: haslo, podpowiedz: 'kod z kłódką od klienta'),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           _opis('przychodzi sam, gdy klient zamknie kłódkę przy kodzie',
               rozmiar: 10),
           et('NOTATKA (NIEOBOWIĄZKOWA)'),
@@ -2178,7 +2182,7 @@ class SzperaczMalaKarta extends StatelessWidget {
     // Okienko połączenia wypełnia całe okno CM (zawartość ma Expanded),
     // więc nie używamy SzperaczOkno (Column min) — tylko ten sam wygląd.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 22, 18, 12),
+      padding: EdgeInsets.fromLTRB(8, 22, 18, 12),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -2187,25 +2191,23 @@ class SzperaczMalaKarta extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: _K.zloto, width: 4),
-                image: const DecorationImage(
-                  image: AssetImage('assets/szperacz_rdza.png'),
-                  fit: BoxFit.cover,
-                ),
-                boxShadow: const [
+                image: szperaczTekstura(),
+                color: szperaczKolorOkna(),
+                boxShadow: [
                   BoxShadow(color: _K.zlotoCiemne, offset: Offset(0, 3)),
                   BoxShadow(color: _K.zlotoBraz, offset: Offset(0, 6)),
                 ],
               ),
               child: Container(
-                margin: const EdgeInsets.all(7),
+                margin: EdgeInsets.all(7),
                 padding: padding,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(7),
                   border:
-                      Border.all(color: const Color(0xB3C9A227), width: 1),
+                      Border.all(color: sk(0xB3C9A227), width: 1),
                 ),
                 child: DefaultTextStyle(
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontFamily: 'SzperaczSerif',
                       color: _K.krem,
                       fontSize: 13),
@@ -2214,6 +2216,7 @@ class SzperaczMalaKarta extends StatelessWidget {
               ),
             ),
           ),
+          if (szperaczSkorka.value.stempel)
           Positioned(
             top: -26,
             right: -22,
@@ -2235,8 +2238,8 @@ class SzperaczMalaKarta extends StatelessWidget {
 }
 
 /// Kolory nagłówka okienka połączenia (czerwona wstęga 3D).
-const szperaczNaglowekKolory = [Color(0xFFB32424), Color(0xFF7A1414)];
-const szperaczZloto = _K.zlotoSrednie;
+List<Color> get szperaczNaglowekKolory => [sk(0xFFB32424), sk(0xFF7A1414)];
+Color get szperaczZloto => _K.zlotoSrednie;
 
 /// Opakowanie, bo menedżer okienek RustDeska przyjmuje tylko CustomAlertDialog.
 class _Surowy extends CustomAlertDialog {
@@ -2275,7 +2278,7 @@ Future<Map<String, dynamic>?> _zapytaj(String sciezka, Map<String, dynamic> dane
         .post(Uri.parse('$_adresStrazy/$sciezka'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(dane))
-        .timeout(const Duration(seconds: 10));
+        .timeout(Duration(seconds: 10));
     if (r.statusCode != 200) return null;
     return jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>;
   } catch (_) {
@@ -2290,7 +2293,7 @@ void _oknoBlokady(String tekst) {
         onEscape: close,
         tresc: Column(mainAxisSize: MainAxisSize.min, children: [
           _opis(tekst),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           _opis('Twój identyfikator: $_mojeId', rozmiar: 11),
           _opis('Skontaktuj się z MINITEL: biuro@minitel24.pl', rozmiar: 11),
         ]),

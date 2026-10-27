@@ -7,6 +7,7 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide TabBarTheme;
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/desktop/pages/szperacz_skorka.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/pages/remote_page.dart';
 import 'package:flutter_hbb/desktop/pages/view_camera_page.dart';
@@ -596,13 +597,11 @@ class _DesktopTabState extends State<DesktopTab>
     final isIncomingHomePage = bind.isIncomingOnly() && isInHomePage();
     // Szperacz (267.1): ciemny rdzawy pasek kart ze złotą linią u dołu.
     return Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/szperacz_rdza.png'),
-            fit: BoxFit.cover,
-          ),
+        decoration: BoxDecoration(
+          image: szperaczTekstura(),
+          color: szperaczKolorOkna(),
           border:
-              Border(bottom: BorderSide(color: Color(0xFFC9A227), width: 3)),
+              Border(bottom: BorderSide(color: sk(0xFFC9A227), width: 3)),
         ),
         child: Row(
       children: [
@@ -1465,19 +1464,19 @@ class TabbarTheme extends ThemeExtension<TabbarTheme> {
       required this.closeHoverColor,
       required this.selectedTabBackgroundColor});
 
-  // Szperacz (267.2): karty w kolorach programu niezależnie od motywu —
-  // aktywna złota z ciemnym napisem, pozostałe kremowe napisy na rdzy.
+  // Szperacz (267.2, 389.x): karty w neutralnych szarościach pasujących do każdej skórki —
+  // aktywna jasnoszara z ciemnym napisem, pozostałe jasne napisy na tle skórki.
   static const _szperacz = TabbarTheme(
-      selectedTabIconColor: Color(0xFF2E1B0D),
-      unSelectedTabIconColor: Color(0xFFF2D77A),
-      selectedTextColor: Color(0xFF2E1B0D),
-      unSelectedTextColor: Color(0xFFF6E9C8),
-      selectedIconColor: Color(0xFF2E1B0D),
-      unSelectedIconColor: Color(0xFFF2D77A),
-      dividerColor: Color(0x80C9A227),
-      hoverColor: Color(0x40C9A227),
+      selectedTabIconColor: Color(0xFF1B1E22),
+      unSelectedTabIconColor: Color(0xFFC1C8D0),
+      selectedTextColor: Color(0xFF1B1E22),
+      unSelectedTextColor: Color(0xFFE6E9EC),
+      selectedIconColor: Color(0xFF1B1E22),
+      unSelectedIconColor: Color(0xFFC1C8D0),
+      dividerColor: Color(0x809AA3AB),
+      hoverColor: Color(0x409AA3AB),
       closeHoverColor: Color(0xFFC02C2C),
-      selectedTabBackgroundColor: Color(0xFFC9A227));
+      selectedTabBackgroundColor: Color(0xFFC1C8D0));
 
   static const light = _szperacz;
 

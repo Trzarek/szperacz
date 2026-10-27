@@ -62,6 +62,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     super.build(context);
     // Szperacz: najpierw wybór trybu, w trybie klienta okno-etykieta zamiast panelu RustDesk.
     return Obx(() {
+      // 389.3: zmiana skórki z panelu admina przebudowuje okno.
+      szperaczSkorka.value;
       switch (szperaczTryb.value) {
         case null:
           return const SzperaczWybor();

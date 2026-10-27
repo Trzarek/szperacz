@@ -285,14 +285,12 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFC9A227), width: 4),
-              image: const DecorationImage(
-                image: AssetImage('assets/szperacz_rdza.png'),
-                fit: BoxFit.cover,
-              ),
-              boxShadow: const [
-                BoxShadow(color: Color(0xFF8C6D12), offset: Offset(0, 3)),
-                BoxShadow(color: Color(0xFF5E4709), offset: Offset(0, 6)),
+              border: Border.all(color: sk(0xFFC9A227), width: 4),
+              image: szperaczTekstura(),
+                color: szperaczKolorOkna(),
+              boxShadow: [
+                BoxShadow(color: sk(0xFF8C6D12), offset: Offset(0, 3)),
+                BoxShadow(color: sk(0xFF5E4709), offset: Offset(0, 6)),
                 BoxShadow(
                     color: Color(0xA6000000),
                     offset: Offset(0, 12),
@@ -313,8 +311,8 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
                         Padding(
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Text(szperaczOpisWersji,
-                              style: const TextStyle(
-                                  fontSize: 10, color: Color(0xFFEAD7B0))),
+                              style: TextStyle(
+                                  fontSize: 10, color: sk(0xFFEAD7B0))),
                         ),
                       ],
                     ),
@@ -2654,11 +2652,11 @@ Widget _Card(
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xBFC9A227)),
-              gradient: const LinearGradient(
+              border: Border.all(color: sk(0xBFC9A227)),
+              gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xEB080402), Color(0xE60E0804)],
+                colors: [sk(0xEB080402), sk(0xE60E0804)],
               ),
               boxShadow: const [
                 BoxShadow(color: Color(0x80000000), offset: Offset(0, 3)),

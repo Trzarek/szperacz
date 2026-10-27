@@ -30,7 +30,7 @@ class _SzperaczCmState extends State<SzperaczCm> {
   @override
   void initState() {
     super.initState();
-    _zegar = Timer.periodic(const Duration(seconds: 1), (_) {
+    _zegar = Timer.periodic(Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
       szperaczZapiszSesje(_aktywni.length);
     });
@@ -55,7 +55,7 @@ class _SzperaczCmState extends State<SzperaczCm> {
     if (klucz == _tryb) return;
     _tryb = klucz;
     // Z opóźnieniem: showCmWindow() ustawia swój rozmiar asynchronicznie.
-    Future.delayed(const Duration(milliseconds: 800), () async {
+    Future.delayed(Duration(milliseconds: 800), () async {
       try {
         if (tryb == 'akceptacja') {
           await windowManager.setAlwaysOnTop(false);
@@ -118,7 +118,7 @@ class _SzperaczCmState extends State<SzperaczCm> {
       _ustawOkno('male', aktywni.length);
       return _male(aktywni);
     }
-    return SzperaczTlo(child: const SizedBox.expand());
+    return SzperaczTlo(child: SizedBox.expand());
   }
 
   // 240.x: kto się łączy + AKCEPTUJ / ODRZUĆ / AKCEPTUJ JAKO ADMINISTRATOR.
@@ -127,29 +127,29 @@ class _SzperaczCmState extends State<SzperaczCm> {
       child: DragToMoveArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(38),
+            padding: EdgeInsets.all(38),
             child: SzperaczOkno(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Napis3D('POŁĄCZENIE', rozmiar: 22),
+                  Napis3D('POŁĄCZENIE', rozmiar: 22),
                   szperaczEtykieta('ŁĄCZY SIĘ Z TOBĄ SERWISANT'),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(_kto(c),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontFamily: 'SzperaczMono',
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: Color(0xFFFFF3D6))),
-                  const SizedBox(height: 14),
+                          color: sk(0xFFFFF3D6))),
+                  SizedBox(height: 14),
                   Klawisz3D(
                     tekst: 'AKCEPTUJ JAKO ADMINISTRATOR',
                     ikona: Icons.security_rounded,
                     rodzaj: RodzajKlawisza.zloty,
                     onTap: () => _akceptuj(c, administrator: true),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Row(children: [
                     Expanded(
                       child: Klawisz3D(
@@ -157,7 +157,7 @@ class _SzperaczCmState extends State<SzperaczCm> {
                           ikona: Icons.check_rounded,
                           onTap: () => _akceptuj(c)),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Expanded(
                       child: Klawisz3D(
                           tekst: 'ODRZUĆ',
@@ -180,18 +180,16 @@ class _SzperaczCmState extends State<SzperaczCm> {
     return DragToMoveArea(
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFC9A227), width: 3),
-          image: const DecorationImage(
-            image: AssetImage('assets/szperacz_rdza.png'),
-            fit: BoxFit.cover,
-          ),
+          border: Border.all(color: sk(0xFFC9A227), width: 3),
+          image: szperaczTekstura(),
+                color: szperaczKolorOkna(),
         ),
-        padding: const EdgeInsets.fromLTRB(10, 6, 10, 4),
+        padding: EdgeInsets.fromLTRB(10, 6, 10, 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             szperaczEtykieta('★ SZPERACZ · POMOC ZDALNA ★'),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             for (final c in aktywni)
               SizedBox(
                 height: 62,
@@ -205,17 +203,17 @@ class _SzperaczCmState extends State<SzperaczCm> {
                           Text('ŁĄCZY SIĘ: ${_kto(c)}',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontFamily: 'SzperaczSlab',
                                   fontSize: 10,
-                                  color: Color(0xFFF0D9A8))),
-                          const SizedBox(height: 2),
+                                  color: sk(0xFFF0D9A8))),
+                          SizedBox(height: 2),
                           Text(_czas(c),
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontFamily: 'SzperaczMono',
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
-                                  color: Color(0xFFFFF3D6))),
+                                  color: sk(0xFFFFF3D6))),
                         ],
                       ),
                     ),

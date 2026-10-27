@@ -23,7 +23,7 @@ import 'package:flutter_hbb/web/dummy.dart'
 import '../../consts.dart';
 import '../../desktop/widgets/material_mod_popup_menu.dart' as mod_menu;
 import '../../common.dart';
-import 'szperacz.dart' show SzperaczTlo;
+import 'szperacz.dart' show SzperaczTlo, sk, szperaczTekstura, szperaczKolorOkna;
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import '../widgets/popup_menu.dart';
@@ -171,22 +171,20 @@ class _FileManagerPageState extends State<FileManagerPage>
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFC9A227), width: 4),
-              image: const DecorationImage(
-                image: AssetImage('assets/szperacz_rdza.png'),
-                fit: BoxFit.cover,
-              ),
+              border: Border.all(color: sk(0xFFC9A227), width: 4),
+              image: szperaczTekstura(),
+                color: szperaczKolorOkna(),
             ),
             child: Theme(
               // 291.3: ikony, przyciski i zaznaczenia w złocie.
               data: MyTheme.darkTheme.copyWith(
                 colorScheme: MyTheme.darkTheme.colorScheme.copyWith(
-                    primary: const Color(0xFFC9A227),
-                    secondary: const Color(0xFFE0BC45)),
-                iconTheme: const IconThemeData(color: Color(0xFFF2D77A)),
-                highlightColor: const Color(0x40C9A227),
-                hoverColor: const Color(0x30C9A227),
-                dividerColor: const Color(0x80C9A227),
+                    primary: sk(0xFFC9A227),
+                    secondary: sk(0xFFE0BC45)),
+                iconTheme: IconThemeData(color: sk(0xFFF2D77A)),
+                highlightColor: sk(0x40C9A227),
+                hoverColor: sk(0x30C9A227),
+                dividerColor: sk(0x80C9A227),
               ),
               child: Row(
             children: [
@@ -504,8 +502,8 @@ class _FileManagerViewState extends State<FileManagerView> {
       margin: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xBFC9A227)),
-        color: const Color(0xEB080402),
+        border: Border.all(color: sk(0xBFC9A227)),
+        color: sk(0xEB080402),
       ),
       padding: const EdgeInsets.all(8.0),
       child: Column(

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hbb/desktop/pages/szperacz_skorka.dart';
 import 'package:flutter_hbb/common/widgets/audio_input.dart';
 import 'package:flutter_hbb/common/widgets/dialog.dart';
 import 'package:flutter_hbb/common/widgets/toolbar.dart';
@@ -325,13 +326,13 @@ class ToolbarState {
 
 class _ToolbarTheme {
   // Szperacz (291.2): przyciski paska sesji w złocie i rdzy.
-  static const Color blueColor = Color(0xFF8C6D12);
-  static const Color hoverBlueColor = Color(0xFFC9A227);
+  static Color blueColor = sk(0xFF8C6D12);
+  static Color hoverBlueColor = sk(0xFFC9A227);
   static Color inactiveColor = const Color(0xFF2A170C);
   static Color hoverInactiveColor = const Color(0xFF3A2716);
 
-  static const Color redColor = Color(0xFFC02C2C);
-  static const Color hoverRedColor = Color(0xFF9E1B1B);
+  static Color redColor = sk(0xFFC02C2C);
+  static Color hoverRedColor = sk(0xFF9E1B1B);
   // kMinInteractiveDimension
   static const double height = 20.0;
   static const double dividerHeight = 12.0;
@@ -3537,7 +3538,8 @@ class _DraggableShowHideState extends State<_DraggableShowHide> {
     const double iconSize = 20;
 
     buttonWrapper(VoidCallback? onPressed, Widget child,
-        {Color hoverColor = _ToolbarTheme.blueColor}) {
+        {Color? hoverColor}) {
+      final kolorNajechania = hoverColor ?? _ToolbarTheme.blueColor;
       final bgColor = buttonStyle.backgroundColor?.resolve({});
       return TextButton(
         onPressed: onPressed,
@@ -3545,7 +3547,7 @@ class _DraggableShowHideState extends State<_DraggableShowHide> {
         style: buttonStyle.copyWith(
           backgroundColor: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.hovered)) {
-              return (bgColor ?? hoverColor).withOpacity(0.15);
+              return (bgColor ?? kolorNajechania).withOpacity(0.15);
             }
             return bgColor;
           }),
