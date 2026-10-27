@@ -972,14 +972,24 @@ void wrongPasswordDialog(
   });
 }
 
+/// Szperacz (372.x): prośba o kod przychodzi kilka razy (połączenie bezpośrednie,
+/// potem przez przekaźnik). Okienko „KOD OD KLIENTA” nie może się wtedy zamykać
+/// i otwierać puste — zostaje to samo, a wpisane cyfry są zachowane.
+final _szperaczKody = <String, TextEditingController>{};
+
 void enterPasswordDialog(
   SessionID sessionId,
   OverlayDialogManager dialogManager,
 ) async {
+  final tag = 'szperacz-kod-$sessionId';
+  if (dialogManager.existing(tag)) return;
+  final kontroler =
+      _szperaczKody.putIfAbsent(tag, () => TextEditingController());
   await _connectDialog(
     sessionId,
     dialogManager,
-    passwordController: TextEditingController(),
+    passwordController: kontroler,
+    tag: tag,
   );
 }
 
@@ -1019,6 +1029,7 @@ _connectDialog(
   TextEditingController? osPasswordController,
   TextEditingController? passwordController,
   String? osAccountDescTip,
+  String? tag,
 }) async {
   final errUsername = ''.obs;
   // Szperacz (137.x): kod jednorazowy nigdy nie jest zapamiętywany.
@@ -1050,6 +1061,7 @@ _connectDialog(
       final osPassword = osPasswordController?.text.trim() ?? '';
       final password = passwordController?.text.trim() ?? '';
       if (passwordController != null && password.isEmpty) return;
+      if (tag != null) passwordController?.clear();
       gFFI.login(osUsername, osPassword, sessionId, password, rememberPassword);
       close();
       dialogManager.showLoading(
@@ -1201,7 +1213,7 @@ _connectDialog(
       onSubmit: submit,
       onCancel: cancel,
     );
-  });
+  }, tag: tag);
 }
 
 void showWaitUacDialog(
