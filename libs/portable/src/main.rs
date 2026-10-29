@@ -283,7 +283,11 @@ fn main() -> Result<(), String> {
         }
         i += 1;
     }
-    let click_setup = args.is_empty() && arg_exe.to_lowercase().ends_with("install.exe");
+    // Szperacz (407.1): „Szperacz-instalator.exe” uruchamia instalację.
+    let click_setup = args.is_empty() && {
+        let n = arg_exe.to_lowercase();
+        n.ends_with("install.exe") || n.contains("instalator")
+    };
     #[cfg(windows)]
     let quick_support = args.is_empty() && win::is_quick_support_exe(&arg_exe);
     #[cfg(not(windows))]

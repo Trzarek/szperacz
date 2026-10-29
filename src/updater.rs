@@ -89,6 +89,60 @@ pub fn start_auto_update() {
     let _sender = TX_MSG.lock().unwrap();
 }
 
+/// Szperacz (408.x): aktualizacja zainstalowanego Szperacza przez usługę (SYSTEM, bez UAC).
+/// Okno programu po kliknięciu AKTUALIZUJ zapisuje opcję „szperacz-aktualizuj”;
+/// usługa czeka na koniec połączeń (408.2), pobiera instalator z wersja.json,
+/// sprawdza SHA-256 i uruchamia go z „--update” (ten sam mechanizm co w RustDesku).
+#[cfg(target_os = "windows")]
+pub fn szperacz_start_aktualizacji() {
+    std::thread::spawn(|| loop {
+        std::thread::sleep(Duration::from_secs(15));
+        let wersja = config::Config::get_option("szperacz-aktualizuj");
+        if wersja.is_empty() || !has_no_active_conns() {
+            continue;
+        }
+        config::Config::set_option("szperacz-aktualizuj".to_owned(), "".to_owned());
+        if let Err(e) = szperacz_aktualizuj(&wersja) {
+            log::error!("Szperacz: aktualizacja do {} nieudana: {}", wersja, e);
+        }
+    });
+}
+
+#[cfg(target_os = "windows")]
+fn szperacz_aktualizuj(wersja: &str) -> ResultType<()> {
+    use hbb_common::sha2::{Digest, Sha256};
+    let adres = "https://szperacz.minitel24.pl/wersja.json";
+    let opis: serde_json::Value = create_http_client_with_url_strict(adres)?
+        .get(adres)
+        .send()?
+        .json()?;
+    let plik = opis["plik"].as_str().unwrap_or_default().to_owned();
+    let suma = opis["sha256"].as_str().unwrap_or_default().to_lowercase();
+    if !plik.starts_with("https://szperacz.minitel24.pl/") || suma.len() != 64 {
+        bail!("zły opis wersji");
+    }
+    let dane = create_http_client_with_url_strict(&plik)?
+        .get(&plik)
+        .send()?
+        .error_for_status()?
+        .bytes()?;
+    let mut h = Sha256::new();
+    h.update(&dane);
+    let policzona: String = h.finalize().iter().map(|b| format!("{:02x}", b)).collect();
+    if policzona != suma {
+        bail!("zła suma kontrolna");
+    }
+    let sciezka = std::env::temp_dir().join(format!("szperacz-{}-instalator.exe", wersja));
+    std::fs::File::create(&sciezka)?.write_all(&dane)?;
+    if !has_no_active_conns() {
+        // W trakcie pobierania ktoś się połączył — spróbuj ponownie po sesji.
+        config::Config::set_option("szperacz-aktualizuj".to_owned(), wersja.to_owned());
+        return Ok(());
+    }
+    update_new_version(false, wersja, &sciezka);
+    Ok(())
+}
+
 #[allow(dead_code)]
 pub fn manually_check_update() -> ResultType<()> {
     let sender = TX_MSG.lock().unwrap();

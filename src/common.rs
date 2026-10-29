@@ -1104,7 +1104,9 @@ pub fn get_full_name() -> String {
 }
 
 pub fn is_setup(name: &str) -> bool {
-    !config::is_disable_installation() && name.to_lowercase().ends_with("install.exe")
+    // Szperacz (407.1): „Szperacz-instalator.exe” (także „… (1).exe” po ponownym pobraniu).
+    let n = name.to_lowercase();
+    !config::is_disable_installation() && (n.ends_with("install.exe") || n.contains("instalator"))
 }
 
 pub fn get_custom_rendezvous_server(custom: String) -> String {

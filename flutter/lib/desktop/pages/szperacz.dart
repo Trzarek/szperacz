@@ -29,10 +29,9 @@ const szperaczWersja = '0.11.0';
 const szperaczBudowa = 'SZPERACZ_BUDOWA';
 
 /// Napis z wersją do stopek okien.
-String get szperaczOpisWersji =>
-    szperaczBudowa == 'SZPERACZ_' 'BUDOWA'
-        ? 'wersja $szperaczWersja · budowa lokalna'
-        : 'wersja $szperaczWersja · budowa $szperaczBudowa';
+String get szperaczOpisWersji => szperaczBudowa == 'SZPERACZ_' 'BUDOWA'
+    ? 'wersja $szperaczWersja · budowa lokalna'
+    : 'wersja $szperaczWersja · budowa $szperaczBudowa';
 
 // ───────────────────────────── kolory ─────────────────────────────
 
@@ -60,20 +59,20 @@ class _K {
 
 /// Warstwy wytłoczenia napisów 3D (od góry do dołu).
 List<Color> get _warstwy => [
-  sk(0xFFE8D39A),
-  sk(0xFFD9BC5C),
-  sk(0xFFC9A227),
-  sk(0xFFA58219),
-  sk(0xFF7C5F10),
-  sk(0xFF4F3B08),
-];
+      sk(0xFFE8D39A),
+      sk(0xFFD9BC5C),
+      sk(0xFFC9A227),
+      sk(0xFFA58219),
+      sk(0xFF7C5F10),
+      sk(0xFF4F3B08),
+    ];
 
 LinearGradient get _gradientZloty => LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [_K.zlotoBlysk, _K.zlotoSrednie, _K.zloto, _K.zlotoCiemne],
-  stops: [0.0, 0.35, 0.6, 1.0],
-);
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [_K.zlotoBlysk, _K.zlotoSrednie, _K.zloto, _K.zlotoCiemne],
+      stops: [0.0, 0.35, 0.6, 1.0],
+    );
 
 // ───────────────────────────── tło i okno ─────────────────────────────
 
@@ -135,7 +134,7 @@ class SzperaczOkno extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: _K.zloto, width: 4),
               image: szperaczTekstura(),
-                color: szperaczKolorOkna(),
+              color: szperaczKolorOkna(),
               boxShadow: [
                 BoxShadow(color: _K.zlotoCiemne, offset: Offset(0, 3)),
                 BoxShadow(color: _K.zlotoBraz, offset: Offset(0, 6)),
@@ -171,8 +170,7 @@ class SzperaczOkno extends StatelessWidget {
                   fontSize: 13,
                   shadows: [Shadow(offset: Offset(0, 1), blurRadius: 1)],
                 ),
-                textAlign:
-                    wyrownajDoLewej ? TextAlign.left : TextAlign.center,
+                textAlign: wyrownajDoLewej ? TextAlign.left : TextAlign.center,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: wyrownajDoLewej
@@ -251,7 +249,10 @@ class Napis3D extends StatelessWidget {
                 tekst,
                 textAlign: TextAlign.center,
                 style: styl(
-                  _warstwy[((i - 1) * (_warstwy.length - 1) / (glebokosc - 1 == 0 ? 1 : glebokosc - 1)).round()],
+                  _warstwy[((i - 1) *
+                          (_warstwy.length - 1) /
+                          (glebokosc - 1 == 0 ? 1 : glebokosc - 1))
+                      .round()],
                   cienie: i == glebokosc
                       ? [
                           Shadow(
@@ -263,8 +264,7 @@ class Napis3D extends StatelessWidget {
                 ),
               ),
             ),
-          Text(tekst,
-              textAlign: TextAlign.center, style: styl(_K.kremJasny)),
+          Text(tekst, textAlign: TextAlign.center, style: styl(_K.kremJasny)),
         ],
       ),
     );
@@ -338,9 +338,7 @@ class SzperaczWstega extends StatelessWidget {
               boxShadow: [
                 BoxShadow(color: sk(0xFF4F3B08), offset: Offset(0, 4)),
                 BoxShadow(
-                    color: sk(0xB3000000),
-                    offset: Offset(0, 7),
-                    blurRadius: 8),
+                    color: sk(0xB3000000), offset: Offset(0, 7), blurRadius: 8),
               ],
             ),
             child: Container(
@@ -350,11 +348,7 @@ class SzperaczWstega extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    sk(0xFFFFFDF5),
-                    sk(0xFFF6EBD0),
-                    sk(0xFFCDB383)
-                  ],
+                  colors: [sk(0xFFFFFDF5), sk(0xFFF6EBD0), sk(0xFFCDB383)],
                   stops: [0.0, 0.45, 1.0],
                 ),
               ),
@@ -374,8 +368,8 @@ class SzperaczWstega extends StatelessWidget {
                         letterSpacing: 3,
                         color: sk(0xFF2E1B0D),
                         shadows: [
-                          Shadow(color: Colors.white, offset: Offset(0, 1))
-                        ]),
+                            Shadow(color: Colors.white, offset: Offset(0, 1))
+                          ]),
               ),
             ),
           ),
@@ -458,23 +452,13 @@ class _Klawisz3DState extends State<Klawisz3D> {
     late Color napis;
     switch (r) {
       case RodzajKlawisza.zielony:
-        g = [
-          sk(0xFF5CC08A),
-          sk(0xFF1F8A50),
-          sk(0xFF0B5A33),
-          sk(0xFF053A1D)
-        ];
+        g = [sk(0xFF5CC08A), sk(0xFF1F8A50), sk(0xFF0B5A33), sk(0xFF053A1D)];
         podstawa1 = sk(0xFF02200F);
         podstawa2 = sk(0xFF011208);
         napis = Colors.white;
         break;
       case RodzajKlawisza.czerwony:
-        g = [
-          sk(0xFFF07070),
-          sk(0xFFC02C2C),
-          sk(0xFF9E1B1B),
-          sk(0xFF5E0B0B)
-        ];
+        g = [sk(0xFFF07070), sk(0xFFC02C2C), sk(0xFF9E1B1B), sk(0xFF5E0B0B)];
         podstawa1 = sk(0xFF4A0A0A);
         podstawa2 = sk(0xFF2A0505);
         napis = Colors.white;
@@ -486,12 +470,7 @@ class _Klawisz3DState extends State<Klawisz3D> {
         napis = sk(0xFF2E1B0D);
         break;
       case RodzajKlawisza.ciemny:
-        g = [
-          sk(0xFF3A2716),
-          sk(0xFF1F140A),
-          sk(0xFF140C06),
-          sk(0xFF080402)
-        ];
+        g = [sk(0xFF3A2716), sk(0xFF1F140A), sk(0xFF140C06), sk(0xFF080402)];
         podstawa1 = sk(0xFF050301);
         podstawa2 = Colors.black;
         napis = sk(0xFFF6E9C8);
@@ -702,8 +681,7 @@ class Pole3D extends StatelessWidget {
             border: InputBorder.none,
             hintText: podpowiedz,
             hintStyle: TextStyle(color: sk(0xFF8A7A5A), shadows: []),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           ),
         ),
       ),
@@ -739,7 +717,9 @@ Widget _kupon(TextEditingController kontroler,
           ],
         ),
         child: SelectableText(
-          w.text.isEmpty ? '...' : (przerywany ? w.text.replaceAll(' ', '') : w.text),
+          w.text.isEmpty
+              ? '...'
+              : (przerywany ? w.text.replaceAll(' ', '') : w.text),
           style: TextStyle(
             fontFamily: 'SzperaczMono',
             fontWeight: FontWeight.w700,
@@ -824,39 +804,41 @@ class SzperaczDialog extends CustomAlertDialog {
       child: Stack(children: [
         Positioned.fill(child: SzperaczTlo(child: SizedBox.expand())),
         Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        insetPadding: EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 26, right: 22),
-          child: _PowiekszOkno(child: SzperaczOkno(
-            maxSzerokosc: szerokosc,
-            child: Theme(
-              data: MyTheme.lightTheme,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Napis3D(tytul, rozmiar: 19),
-                  SizedBox(height: 6),
-                  tresc,
-                  if (akcje.isNotEmpty) ...[
-                    SizedBox(height: 12),
-                    Row(
-                      children: [
-                        for (var i = 0; i < akcje.length; i++) ...[
-                          if (i > 0) SizedBox(width: 10),
-                          Expanded(child: akcje[i]),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(top: 26, right: 22),
+            child: _PowiekszOkno(
+                child: SzperaczOkno(
+              maxSzerokosc: szerokosc,
+              child: Theme(
+                data: MyTheme.lightTheme,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Napis3D(tytul, rozmiar: 19),
+                    SizedBox(height: 6),
+                    tresc,
+                    if (akcje.isNotEmpty) ...[
+                      SizedBox(height: 12),
+                      Row(
+                        children: [
+                          for (var i = 0; i < akcje.length; i++) ...[
+                            if (i > 0) SizedBox(width: 10),
+                            Expanded(child: akcje[i]),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          )),
-        ),
-      )]),
+            )),
+          ),
+        )
+      ]),
     );
   }
 }
@@ -916,19 +898,22 @@ int _porownajWersje(String a, String b) {
 
 Future<void> _sprawdzWersje() async {
   try {
-    final r = await http
-        .get(Uri.parse(_adresWersji))
-        .timeout(Duration(seconds: 15));
+    final r =
+        await http.get(Uri.parse(_adresWersji)).timeout(Duration(seconds: 15));
     if (r.statusCode != 200) return;
     final j = jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>;
     final w = (j['wersja'] ?? '').toString();
     if (w.isNotEmpty && _porownajWersje(w, szperaczWersja) > 0) {
+      final pierwszy = _nowaWersja.value?.wersja != w;
       _nowaWersja.value = _NowaWersja(
         w,
         (j['nazwa'] ?? 'SZPERACZ $w').toString(),
-        (j['plik'] ?? 'https://szperacz.minitel24.pl/Szperacz.exe').toString(),
+        (j['plik'] ?? 'https://szperacz.minitel24.pl/Szperacz-instalator.exe')
+            .toString(),
         (j['sha256'] ?? '').toString().toLowerCase(),
       );
+      // 408.1: o nowej wersji program sam informuje okienkiem AKTUALIZUJ / PÓŹNIEJ.
+      if (pierwszy) _potwierdzAktualizacje(_nowaWersja.value!);
     }
   } catch (_) {}
 }
@@ -937,8 +922,7 @@ Future<void> _sprawdzWersje() async {
 void szperaczStartSprawdzaniaWersji() {
   if (_timerWersji != null) return;
   _sprawdzWersje();
-  _timerWersji =
-      Timer.periodic(Duration(hours: 24), (_) => _sprawdzWersje());
+  _timerWersji = Timer.periodic(Duration(hours: 24), (_) => _sprawdzWersje());
 }
 
 /// Złota wstęga „NOWA WERSJA … JEST GOTOWA — POBIERZ” u góry każdego okna.
@@ -961,9 +945,7 @@ class SzperaczWstegaNowejWersji extends StatelessWidget {
             boxShadow: [
               BoxShadow(color: sk(0xFF3E2A05), offset: Offset(0, 4)),
               BoxShadow(
-                  color: sk(0x99000000),
-                  offset: Offset(0, 6),
-                  blurRadius: 8),
+                  color: sk(0x99000000), offset: Offset(0, 6), blurRadius: 8),
             ],
           ),
           child: Row(
@@ -1034,11 +1016,26 @@ void _potwierdzAktualizacje(_NowaWersja n) {
   });
 }
 
-/// Pobiera nowy Szperacz.exe, sprawdza SHA-256 i podmienia plik (199.3).
+/// 408.x: wersja zainstalowana — aktualizację robi usługa Szperacza (bez UAC),
+/// po zakończeniu połączeń. Wersja przenośna (stara, 410.2) — pobiera nowy plik
+/// i podmienia go jak dotąd (199.3).
 Future<void> _aktualizuj(_NowaWersja n) async {
+  if (Platform.isWindows && bind.mainIsInstalled()) {
+    await bind.mainSetOption(key: 'szperacz-aktualizuj', value: n.wersja);
+    gFFI.dialogManager.show((setState, close, context) {
+      return SzperaczDialog(
+        tytul: 'AKTUALIZACJA',
+        onEscape: close,
+        tresc: _opis('AKTUALIZACJA DO ${n.wersja}\n'
+            'Pobieranie trwa w tle — program zaraz uruchomi się ponownie.'
+            '${gFFI.serverModel.clients.isNotEmpty ? '\nNastąpi to po zakończeniu połączenia.' : ''}'),
+        akcje: [Klawisz3D(tekst: 'OK', onTap: close)],
+      );
+    });
+    return;
+  }
   final plik = bind.mainGetEnv(key: 'SZPERACZ_PLIK');
-  if (!Platform.isWindows || plik.isEmpty || bind.mainIsInstalled()) {
-    // Wersja zainstalowana lub brak ścieżki: pobranie ze strony.
+  if (!Platform.isWindows || plik.isEmpty) {
     launchUrl(Uri.parse('https://szperacz.minitel24.pl'));
     return;
   }
@@ -1062,13 +1059,13 @@ Future<void> _aktualizuj(_NowaWersja n) async {
         'timeout /t 2 /nobreak >nul\r\n'
         'move /y "$nowy" "$plik" >nul\r\n'
         'start "" "$plik"\r\n');
-    await Process.start('cmd', ['/c', skrypt],
-        mode: ProcessStartMode.detached);
+    await Process.start('cmd', ['/c', skrypt], mode: ProcessStartMode.detached);
     gFFI.dialogManager.dismissAll();
     exit(0);
   } catch (e) {
     gFFI.dialogManager.dismissAll();
-    showToast('Aktualizacja nie powiodła się ($e). Pobierz ze strony szperacz.minitel24.pl.');
+    showToast(
+        'Aktualizacja nie powiodła się ($e). Pobierz ze strony szperacz.minitel24.pl.');
   }
 }
 
@@ -1239,9 +1236,7 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
               BoxShadow(color: sk(0xFF4A0A0A), offset: Offset(0, 5)),
               BoxShadow(color: sk(0xFF2A0505), offset: Offset(0, 7)),
               BoxShadow(
-                  color: sk(0xB3000000),
-                  offset: Offset(0, 10),
-                  blurRadius: 12),
+                  color: sk(0xB3000000), offset: Offset(0, 10), blurRadius: 12),
             ],
           ),
           child: Row(
@@ -1289,18 +1284,11 @@ class _SzperaczWyborState extends State<SzperaczWybor> {
               ),
               _malyKlawisz(
                   Icons.arrow_forward_rounded,
-                  [
-                    sk(0xFF5CC08A),
-                    sk(0xFF1F8A50),
-                    sk(0xFF053A1D)
-                  ],
+                  [sk(0xFF5CC08A), sk(0xFF1F8A50), sk(0xFF053A1D)],
                   Colors.white,
                   _wejdz),
-              _malyKlawisz(
-                  Icons.close_rounded,
-                  [sk(0xFF3A2716), sk(0xFF140C06)],
-                  _K.zlotoJasne,
-                  _anuluj),
+              _malyKlawisz(Icons.close_rounded,
+                  [sk(0xFF3A2716), sk(0xFF140C06)], _K.zlotoJasne, _anuluj),
             ],
           ),
         ),
@@ -1394,8 +1382,8 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
     final zamknij = !_staly;
     await bind.mainSetOption(
         key: 'szperacz-kod-staly', value: zamknij ? kod : '');
-    final o = await _zapytaj(
-        'kod', {'komputer': numer, 'kod': zamknij ? kod : ''});
+    final o =
+        await _zapytaj('kod', {'komputer': numer, 'kod': zamknij ? kod : ''});
     if (!mounted) return;
     setState(() {
       _wysylam = false;
@@ -1418,8 +1406,7 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
                     height: 1.2,
                     color: sk(0xFF2E1B0D))),
           ])
-        : Icon(Icons.lock_open_rounded,
-            size: 18, color: sk(0xFF2E1B0D));
+        : Icon(Icons.lock_open_rounded, size: 18, color: sk(0xFF2E1B0D));
     return Tooltip(
       message: _staly
           ? 'Odblokuj — kod zmieni się po następnym połączeniu'
@@ -1443,9 +1430,7 @@ class _SzperaczKlientState extends State<SzperaczKlient> {
               boxShadow: [
                 BoxShadow(color: sk(0xFF3E2A05), offset: Offset(0, 4)),
                 BoxShadow(
-                    color: sk(0x99000000),
-                    offset: Offset(0, 6),
-                    blurRadius: 8),
+                    color: sk(0x99000000), offset: Offset(0, 6), blurRadius: 8),
               ],
             ),
             alignment: Alignment.center,
@@ -1581,7 +1566,8 @@ void szperaczUstawHasloStale({
         elevation: 0,
         child: SingleChildScrollView(
           padding: EdgeInsets.only(top: 26, right: 22),
-          child: _PowiekszOkno(child: SzperaczOkno(
+          child: _PowiekszOkno(
+              child: SzperaczOkno(
             maxSzerokosc: 340,
             child: Theme(
               data: MyTheme.lightTheme,
@@ -1590,7 +1576,8 @@ void szperaczUstawHasloStale({
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Center(child: _naglowek('STAŁY DOSTĘP')),
-                  _opis('Z hasłem stałym serwisant MINITEL połączy się bez kodu '
+                  _opis(
+                      'Z hasłem stałym serwisant MINITEL połączy się bez kodu '
                       'i bez klikania AKCEPTUJ. Połączenie zawsze widać na ekranie.',
                       rozmiar: 11),
                   SizedBox(height: 10),
@@ -1668,8 +1655,9 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
   void initState() {
     super.initState();
     _timer = Timer.periodic(Duration(seconds: 2), (_) async {
-      final sesja =
-          rustDeskWinManager.getActiveWindows().any((id) => id != kWindowMainId);
+      final sesja = rustDeskWinManager
+          .getActiveWindows()
+          .any((id) => id != kWindowMainId);
       try {
         if (sesja && !_schowany) {
           _schowany = true;
@@ -1810,8 +1798,8 @@ class _SzperaczOperatorState extends State<SzperaczOperator> {
                     rozmiarNapisu: 14,
                     rodzaj: RodzajKlawisza.zloty,
                     podpowiedz: 'Książka klientów',
-                    onTap: () => szperaczKsiazka(
-                        context, (id) => _numer.text = id),
+                    onTap: () =>
+                        szperaczKsiazka(context, (id) => _numer.text = id),
                   ),
                 ),
               ],
@@ -1885,7 +1873,8 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
     final f = szukaj.text.toLowerCase();
     final widoczni = [
       for (var i = 0; i < lista.length; i++)
-        if (lista[i].nazwa.toLowerCase().contains(f) || lista[i].id.contains(f)) i
+        if (lista[i].nazwa.toLowerCase().contains(f) || lista[i].id.contains(f))
+          i
     ];
     void polacz(int i) {
       close();
@@ -1894,8 +1883,8 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
       _zglosPolaczenie(lista[i].id);
     }
 
-    final wysokosc = (MediaQuery.of(context).size.height * 0.45)
-        .clamp(200.0, 900.0);
+    final wysokosc =
+        (MediaQuery.of(context).size.height * 0.45).clamp(200.0, 900.0);
     return SzperaczDialog(
       tytul: 'KSIĄŻKA KLIENTÓW',
       szerokosc: 400,
@@ -1965,7 +1954,8 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                 waitDuration: Duration(milliseconds: 600),
                                 child: InkWell(
                                   onTap: () => k.nazwa.isEmpty
-                                      ? _edytujKlienta(lista, i, () => setState(() {}))
+                                      ? _edytujKlienta(
+                                          lista, i, () => setState(() {}))
                                       : setState(() => zaznaczony = i),
                                   onDoubleTap: () => polacz(i),
                                   child: Container(
@@ -2006,7 +1996,8 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                         padding: EdgeInsets.zero,
                                         onSelected: (v) {
                                           if (v == 'zmien') {
-                                            _edytujKlienta(lista, i, () => setState(() {}));
+                                            _edytujKlienta(lista, i,
+                                                () => setState(() {}));
                                           } else {
                                             lista.removeAt(i);
                                             _zapiszKsiazke(lista);
@@ -2015,9 +2006,11 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                         },
                                         itemBuilder: (_) => [
                                           PopupMenuItem(
-                                              value: 'zmien', child: Text('Zmień')),
+                                              value: 'zmien',
+                                              child: Text('Zmień')),
                                           PopupMenuItem(
-                                              value: 'usun', child: Text('Usuń')),
+                                              value: 'usun',
+                                              child: Text('Usuń')),
                                         ],
                                       ),
                                     ]),
@@ -2089,8 +2082,8 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
         pokazBlad('Wpisz hasło / kod klienta.');
         return;
       }
-      final nowy =
-          _Klient(id, nazwa.text.trim(), haslo.text.trim(), notatka.text.trim());
+      final nowy = _Klient(
+          id, nazwa.text.trim(), haslo.text.trim(), notatka.text.trim());
       try {
         if (indeks == null) {
           lista.add(nowy);
@@ -2141,7 +2134,9 @@ void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
           Pole3D(kontroler: nr, podpowiedz: '123456789', autoFocus: true),
           et('NAZWA'),
           Pole3D(
-              kontroler: nazwa, podpowiedz: 'np. Hostel recepcja', cyfry: false),
+              kontroler: nazwa,
+              podpowiedz: 'np. Hostel recepcja',
+              cyfry: false),
           et('HASŁO / KOD KLIENTA'),
           Pole3D(kontroler: haslo, podpowiedz: 'kod z kłódką od klienta'),
           SizedBox(height: 4),
@@ -2203,8 +2198,7 @@ class SzperaczMalaKarta extends StatelessWidget {
                 padding: padding,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(7),
-                  border:
-                      Border.all(color: sk(0xB3C9A227), width: 1),
+                  border: Border.all(color: sk(0xB3C9A227), width: 1),
                 ),
                 child: DefaultTextStyle(
                   style: TextStyle(
@@ -2217,20 +2211,20 @@ class SzperaczMalaKarta extends StatelessWidget {
             ),
           ),
           if (szperaczSkorka.value.stempel)
-          Positioned(
-            top: -26,
-            right: -22,
-            child: IgnorePointer(
-              child: Transform.rotate(
-                angle: 0.28,
-                child: Opacity(
-                  opacity: 0.55,
-                  child: Image.asset('assets/szperacz_stempel.png',
-                      width: 90, height: 90),
+            Positioned(
+              top: -26,
+              right: -22,
+              child: IgnorePointer(
+                child: Transform.rotate(
+                  angle: 0.28,
+                  child: Opacity(
+                    opacity: 0.55,
+                    child: Image.asset('assets/szperacz_stempel.png',
+                        width: 90, height: 90),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -2272,7 +2266,8 @@ void _zapamietaj(Map<String, dynamic>? d) => bind.mainSetLocalOption(
     key: _kluczStrazy,
     value: d == null ? '' : bind.szperaczSzyfruj(dane: jsonEncode(d)));
 
-Future<Map<String, dynamic>?> _zapytaj(String sciezka, Map<String, dynamic> dane) async {
+Future<Map<String, dynamic>?> _zapytaj(
+    String sciezka, Map<String, dynamic> dane) async {
   try {
     final r = await http
         .post(Uri.parse('$_adresStrazy/$sciezka'),
@@ -2400,11 +2395,12 @@ class _PowiekszOknoState extends State<_PowiekszOkno> {
         // Okienko + margines + odstęp na stempel (26 px u góry i 22 px z prawej).
         final potrzeba = Size(r.size.width + 2 * _margines + 22,
             r.size.height + 2 * _margines + 26);
-        final dw = potrzeba.width - widok.width, dh = potrzeba.height - widok.height;
+        final dw = potrzeba.width - widok.width,
+            dh = potrzeba.height - widok.height;
         if (dw <= 0 && dh <= 0) return;
         _poprzedni = okno;
-        await windowManager.setSize(Size(okno.width + (dw > 0 ? dw : 0),
-            okno.height + (dh > 0 ? dh : 0)));
+        await windowManager.setSize(Size(
+            okno.width + (dw > 0 ? dw : 0), okno.height + (dh > 0 ? dh : 0)));
         await windowManager.center();
       } catch (_) {}
     });

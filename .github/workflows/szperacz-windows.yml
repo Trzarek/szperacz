@@ -111,6 +111,11 @@ jobs:
         run: |
           BUDOWA="#${{ github.run_number }} · $(date +%d.%m.%Y) · ${GITHUB_SHA::7}"
           sed -i "s/'SZPERACZ_BUDOWA'/'$BUDOWA'/" flutter/lib/desktop/pages/szperacz.dart
+          # 406.1: wersja = 0.11.<numer budowy>, żeby program widział nowsze wydania.
+          WERSJA="0.11.${{ github.run_number }}"
+          sed -i "s/^const szperaczWersja = '0.11.0';/const szperaczWersja = '$WERSJA';/" flutter/lib/desktop/pages/szperacz.dart
+          grep -n "szperaczWersja =" flutter/lib/desktop/pages/szperacz.dart
+          echo "SZPERACZ_WERSJA=$WERSJA" >> "$GITHUB_ENV"
           grep -n "szperaczBudowa =" flutter/lib/desktop/pages/szperacz.dart
           echo "SZPERACZ_BUDOWA=$BUDOWA" >> "$GITHUB_ENV"
 
@@ -151,22 +156,22 @@ jobs:
           mkdir -p ./Wynik
           ls -la ./target/release/ ./libs/portable/target/release/ 2>/dev/null | grep -i packer || true
           if [ -f ./target/release/rustdesk-portable-packer.exe ]; then
-            mv ./target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz.exe
+            mv ./target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz-instalator.exe
           else
-            mv ./libs/portable/target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz.exe
+            mv ./libs/portable/target/release/rustdesk-portable-packer.exe ./Wynik/Szperacz-instalator.exe
           fi
 
       - name: Upload Szperacz.exe
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Szperacz-windows-x64
-          path: ./Wynik/Szperacz.exe
+          path: ./Wynik/Szperacz-instalator.exe
 
       # Publiczne wydanie „najnowsza” — pobieranie bez logowania (np. prosto na QNAP).
       - name: Publish Szperacz.exe
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           tag_name: najnowsza
-          name: "Szperacz 0.11.0 - budowa ${{ env.SZPERACZ_BUDOWA }}"
-          body: "Szperacz.exe - pomoc zdalna MINITEL, wersja 0.11.0, budowa ${{ env.SZPERACZ_BUDOWA }} (na bazie RustDesk 1.5.0, AGPL-3.0)."
-          files: ./Wynik/Szperacz.exe
+          name: "Szperacz ${{ env.SZPERACZ_WERSJA }} - budowa ${{ env.SZPERACZ_BUDOWA }}"
+          body: "Szperacz-instalator.exe - pomoc zdalna MINITEL, wersja ${{ env.SZPERACZ_WERSJA }}, budowa ${{ env.SZPERACZ_BUDOWA }} (na bazie RustDesk 1.5.0, AGPL-3.0)."
+          files: ./Wynik/Szperacz-instalator.exe
