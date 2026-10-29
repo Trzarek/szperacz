@@ -3035,9 +3035,11 @@ impl Connection {
                     if matches!(
                         self.conn_audit_primary_auth,
                         ConnAuditPrimaryAuth::PermanentPassword
-                    ) {
+                    ) || !Config::get_option("szperacz-kod-staly").is_empty()
+                    {
                         // Szperacz (146.1): stały klient — hasło stałe ustawione przez klienta
                         // otwiera dostęp bez kliknięcia (także gdy nikogo nie ma przy komputerze).
+                        // Szperacz (403.1): tak samo kod stały z kłódki (274.x) — bez AKCEPTUJ.
                         // Klient i tak widzi okienko połączenia z przyciskiem ROZŁĄCZ.
                         if !self.send_logon_response_and_keep_alive().await {
                             return false;
