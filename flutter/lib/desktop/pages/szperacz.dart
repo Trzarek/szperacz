@@ -1917,10 +1917,13 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                       end: Alignment.bottomCenter,
                       colors: [sk(0xFFA58219), _K.zlotoBraz],
                     ),
+                    // 436.2: wyraźna granica między nagłówkiem a pierwszym wierszem.
+                    border: Border(
+                        bottom: BorderSide(color: sk(0xFF080402), width: 2)),
                   ),
                   child: Row(children: [
                     SizedBox(
-                        width: 100,
+                        width: 130,
                         child: Text('NUMER',
                             style: TextStyle(
                                 fontFamily: 'SzperaczSlab',
@@ -1959,15 +1962,25 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                       : setState(() => zaznaczony = i),
                                   onDoubleTap: () => polacz(i),
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10),
-                                    color: akt
-                                        ? sk(0x80C9A227)
-                                        : (n.isEven
-                                            ? sk(0x4D000000)
-                                            : sk(0x73000000)),
+                                    padding: EdgeInsets.only(left: 7),
+                                    // 436.2: zaznaczony wiersz — jasna poświata i pasek z lewej,
+                                    // żeby nie zlewał się z nagłówkiem.
+                                    decoration: BoxDecoration(
+                                      color: akt
+                                          ? Colors.white.withOpacity(0.22)
+                                          : (n.isEven
+                                              ? sk(0x4D000000)
+                                              : sk(0x73000000)),
+                                      border: Border(
+                                          left: BorderSide(
+                                              color: akt
+                                                  ? _K.zlotoJasne
+                                                  : Colors.transparent,
+                                              width: 3)),
+                                    ),
                                     child: Row(children: [
                                       SizedBox(
-                                        width: 100,
+                                        width: 130,
                                         child: Text(k.id,
                                             style: TextStyle(
                                                 fontFamily: 'SzperaczMono',
