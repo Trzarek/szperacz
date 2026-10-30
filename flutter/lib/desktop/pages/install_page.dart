@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,8 @@ class _InstallPageBodyState extends State<_InstallPageBody>
   final RxBool printer = false.obs;
   final RxBool showProgress = false.obs;
   final RxBool btnEnabled = true.obs;
+  // Szperacz (413.2): na komputerze jest zwykły RustDesk — ostrzeżenie przed instalacją.
+  final RxBool jestRustDesk = false.obs;
 
   // todo move to theme.
   final buttonStyle = OutlinedButton.styleFrom(
@@ -80,13 +83,20 @@ class _InstallPageBodyState extends State<_InstallPageBody>
     final installOptions = jsonDecode(bind.installInstallOptions());
     startmenu.value = installOptions['STARTMENUSHORTCUTS'] != '0';
     desktopicon.value = installOptions['DESKTOPSHORTCUTS'] != '0';
-    printer.value = installOptions['PRINTER'] == '1';
+    // Szperacz (415.1): drukarka Szperacza nie jest instalowana.
+    printer.value = false;
   }
 
   @override
   void initState() {
     windowManager.addListener(this);
     super.initState();
+    if (Platform.isWindows) {
+      Process.run('reg', [
+        'query',
+        r'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk'
+      ]).then((r) => jestRustDesk.value = r.exitCode == 0).catchError((_) => false);
+    }
   }
 
   @override
@@ -165,7 +175,28 @@ class _InstallPageBodyState extends State<_InstallPageBody>
                   .marginOnly(bottom: 7),
               Option(desktopicon, label: 'Create desktop icon')
                   .marginOnly(bottom: 7),
-              Option(printer, label: 'Install {$appName} Printer'),
+              Obx(() => jestRustDesk.value
+                  ? Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Color(0x33C02C2C),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Color(0xFFC02C2C)),
+                      ),
+                      child: Row(children: [
+                        Icon(Icons.warning_amber_rounded,
+                                size: 32, color: Color(0xFFC02C2C))
+                            .marginOnly(right: 16),
+                        Expanded(
+                          child: Text(
+                              'Na tym komputerze jest zainstalowany program RustDesk. '
+                              'Odinstaluj go przed instalacją Szperacza '
+                              '(Ustawienia → Aplikacje → RustDesk → Odinstaluj), '
+                              'żeby programy sobie nie przeszkadzały.'),
+                        ),
+                      ]),
+                    ).marginOnly(top: 7)
+                  : Offstage()),
               Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -257,7 +288,6 @@ class _InstallPageBodyState extends State<_InstallPageBody>
       String args = '';
       if (startmenu.value) args += ' startmenu';
       if (desktopicon.value) args += ' desktopicon';
-      if (printer.value) args += ' printer';
       bind.installInstallMe(options: args, path: controller.text);
     }
 

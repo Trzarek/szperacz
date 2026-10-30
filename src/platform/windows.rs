@@ -1363,7 +1363,8 @@ pub fn get_silent_install_options(printer_override: Option<bool>) -> &'static st
             printer.as_deref() == Some("1")
         }
     };
-    if install_printer && is_win_10_or_greater() {
+    // Szperacz (415.1): drukarka Szperacza nigdy nie jest instalowana.
+    if false && install_printer && is_win_10_or_greater() {
         "desktopicon startmenu printer"
     } else {
         "desktopicon startmenu"
