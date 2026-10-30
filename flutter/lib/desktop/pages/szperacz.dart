@@ -2003,28 +2003,23 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
                                                     ? _K.zlotoJasne
                                                     : _K.opis)),
                                       ),
-                                      PopupMenuButton<String>(
-                                        icon: Icon(Icons.more_vert,
-                                            size: 16, color: _K.zlotoSrednie),
-                                        padding: EdgeInsets.zero,
-                                        onSelected: (v) {
-                                          if (v == 'zmien') {
-                                            _edytujKlienta(lista, i,
-                                                () => setState(() {}));
-                                          } else {
-                                            lista.removeAt(i);
-                                            _zapiszKsiazke(lista);
-                                            setState(() => zaznaczony = null);
-                                          }
-                                        },
-                                        itemBuilder: (_) => [
-                                          PopupMenuItem(
-                                              value: 'zmien',
-                                              child: Text('Zmień')),
-                                          PopupMenuItem(
-                                              value: 'usun',
-                                              child: Text('Usuń')),
-                                        ],
+                                      // 437.1: menu systemowe otwierało się pod oknem
+                                      // książki — własne okienko ZMIEŃ / USUŃ.
+                                      InkWell(
+                                        onTap: () => _menuKlienta(
+                                            k,
+                                            () => _edytujKlienta(lista, i,
+                                                () => setState(() {})), () {
+                                          lista.removeAt(i);
+                                          _zapiszKsiazke(lista);
+                                          setState(() => zaznaczony = null);
+                                        }),
+                                        child: SizedBox(
+                                          width: 32,
+                                          height: 28,
+                                          child: Icon(Icons.more_vert,
+                                              size: 18, color: _K.zlotoSrednie),
+                                        ),
                                       ),
                                     ]),
                                   ),
@@ -2065,6 +2060,39 @@ void szperaczKsiazka(BuildContext ctx, ValueChanged<String> wpiszNumer) {
 }
 
 /// Okno „NOWY KLIENT” / „ZMIEŃ KLIENTA” (190, 191): numer, nazwa, hasło stałe (obowiązkowe), notatka.
+/// 437.1: okienko „trzech kropek” przy kliencie w książce.
+void _menuKlienta(_Klient k, VoidCallback zmien, VoidCallback usun) {
+  gFFI.dialogManager.show((setState, close, context) {
+    return SzperaczDialog(
+      tytul: k.nazwa.isEmpty ? k.id : k.nazwa,
+      onEscape: close,
+      tresc: _opis('Numer: ${k.id}'),
+      akcje: [
+        Klawisz3D(
+            tekst: 'USUŃ',
+            ikona: Icons.delete_outline_rounded,
+            rodzaj: RodzajKlawisza.czerwony,
+            onTap: () {
+              close();
+              usun();
+            }),
+        Klawisz3D(
+            tekst: 'ZMIEŃ',
+            ikona: Icons.edit_rounded,
+            onTap: () {
+              close();
+              zmien();
+            }),
+        Klawisz3D(
+            tekst: 'ANULUJ',
+            ikona: Icons.close_rounded,
+            rodzaj: RodzajKlawisza.ciemny,
+            onTap: close),
+      ],
+    );
+  });
+}
+
 void _edytujKlienta(List<_Klient> lista, int? indeks, VoidCallback poZapisie) {
   final k = indeks == null ? null : lista[indeks];
   final nr = TextEditingController(text: k?.id ?? '');
