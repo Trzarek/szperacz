@@ -1016,22 +1016,84 @@ void _potwierdzAktualizacje(_NowaWersja n) {
   });
 }
 
+/// 439.2–439.5: okienko z paskiem postępu — usługa zapisuje „ETAP|procent”
+/// w opcji „szperacz-aktualizacja-stan”, okno czyta ją co sekundę.
+Future<void> _postepAktualizacji(_NowaWersja n) async {
+  await bind.mainSetOption(key: 'szperacz-aktualizacja-stan', value: '');
+  await bind.mainSetOption(key: 'szperacz-aktualizuj', value: n.wersja);
+  var etap = 'START';
+  var procent = 0;
+  Timer? timer;
+  gFFI.dialogManager.show((setState, close, context) {
+    timer ??= Timer.periodic(Duration(seconds: 1), (_) async {
+      final s = await bind.mainGetOption(key: 'szperacz-aktualizacja-stan');
+      final cz = s.split('|');
+      setState(() {
+        etap = s.isEmpty ? 'START' : cz[0];
+        procent = cz.length > 1 ? int.tryParse(cz[1]) ?? 0 : 0;
+      });
+    });
+    void zamknij() {
+      timer?.cancel();
+      close();
+    }
+
+    final blad = etap.startsWith('BŁĄD');
+    final napis = switch (etap) {
+      'START' => 'Przygotowanie…',
+      'CZEKAM' => 'CZEKAM NA KONIEC POŁĄCZENIA',
+      'POBIERANIE' => 'POBIERANIE $procent%',
+      'SPRAWDZANIE' => 'SPRAWDZANIE PLIKU',
+      'INSTALACJA' => 'INSTALACJA — PROGRAM ZARAZ URUCHOMI SIĘ PONOWNIE',
+      _ => etap,
+    };
+    final pasek = switch (etap) {
+      'POBIERANIE' => procent / 100.0,
+      'SPRAWDZANIE' || 'INSTALACJA' => 1.0,
+      _ => null,
+    };
+    return SzperaczDialog(
+      tytul: 'AKTUALIZACJA DO ${n.wersja}',
+      onEscape: zamknij,
+      tresc: Column(mainAxisSize: MainAxisSize.min, children: [
+        _opis(napis),
+        SizedBox(height: 12),
+        if (!blad)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: LinearProgressIndicator(
+              value: etap == 'CZEKAM' ? 0 : pasek,
+              minHeight: 10,
+              backgroundColor: sk(0x73000000),
+              valueColor: AlwaysStoppedAnimation(_K.zlotoJasne),
+            ),
+          ),
+      ]),
+      akcje: [
+        if (blad)
+          Klawisz3D(
+              tekst: 'SPRÓBUJ PONOWNIE',
+              ikona: Icons.refresh_rounded,
+              onTap: () {
+                zamknij();
+                _postepAktualizacji(n);
+              }),
+        Klawisz3D(
+            tekst: 'ZAMKNIJ',
+            ikona: Icons.close_rounded,
+            rodzaj: RodzajKlawisza.ciemny,
+            onTap: zamknij),
+      ],
+    );
+  });
+}
+
 /// 408.x: wersja zainstalowana — aktualizację robi usługa Szperacza (bez UAC),
 /// po zakończeniu połączeń. Wersja przenośna (stara, 410.2) — pobiera nowy plik
 /// i podmienia go jak dotąd (199.3).
 Future<void> _aktualizuj(_NowaWersja n) async {
   if (Platform.isWindows && bind.mainIsInstalled()) {
-    await bind.mainSetOption(key: 'szperacz-aktualizuj', value: n.wersja);
-    gFFI.dialogManager.show((setState, close, context) {
-      return SzperaczDialog(
-        tytul: 'AKTUALIZACJA',
-        onEscape: close,
-        tresc: _opis('AKTUALIZACJA DO ${n.wersja}\n'
-            'Pobieranie trwa w tle — program zaraz uruchomi się ponownie.'
-            '${gFFI.serverModel.clients.isNotEmpty ? '\nNastąpi to po zakończeniu połączenia.' : ''}'),
-        akcje: [Klawisz3D(tekst: 'OK', onTap: close)],
-      );
-    });
+    _postepAktualizacji(n);
     return;
   }
   final plik = bind.mainGetEnv(key: 'SZPERACZ_PLIK');

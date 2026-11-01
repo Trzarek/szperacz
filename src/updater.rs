@@ -93,17 +93,33 @@ pub fn start_auto_update() {
 /// Okno programu po kliknięciu AKTUALIZUJ zapisuje opcję „szperacz-aktualizuj”;
 /// usługa czeka na koniec połączeń (408.2), pobiera instalator z wersja.json,
 /// sprawdza SHA-256 i uruchamia go z „--update” (ten sam mechanizm co w RustDesku).
+/// 439.1: stan aktualizacji dla okna programu — „ETAP|procent” w opcji „szperacz-aktualizacja-stan”
+/// (POBIERANIE, SPRAWDZANIE, INSTALACJA, CZEKAM, BŁĄD: …). Pusta = nic się nie dzieje.
+#[cfg(target_os = "windows")]
+fn szperacz_stan(etap: &str, procent: u32) {
+    let s = format!("{}|{}", etap, procent);
+    if config::Config::get_option("szperacz-aktualizacja-stan") != s {
+        config::Config::set_option("szperacz-aktualizacja-stan".to_owned(), s);
+    }
+}
+
 #[cfg(target_os = "windows")]
 pub fn szperacz_start_aktualizacji() {
+    config::Config::set_option("szperacz-aktualizacja-stan".to_owned(), "".to_owned());
     std::thread::spawn(|| loop {
-        std::thread::sleep(Duration::from_secs(15));
+        std::thread::sleep(Duration::from_secs(2));
         let wersja = config::Config::get_option("szperacz-aktualizuj");
-        if wersja.is_empty() || !has_no_active_conns() {
+        if wersja.is_empty() {
+            continue;
+        }
+        if !has_no_active_conns() {
+            szperacz_stan("CZEKAM", 0); // 439.3
             continue;
         }
         config::Config::set_option("szperacz-aktualizuj".to_owned(), "".to_owned());
         if let Err(e) = szperacz_aktualizuj(&wersja) {
             log::error!("Szperacz: aktualizacja do {} nieudana: {}", wersja, e);
+            szperacz_stan(&format!("BŁĄD: {}", e), 0); // 439.4
         }
     });
 }
@@ -111,6 +127,8 @@ pub fn szperacz_start_aktualizacji() {
 #[cfg(target_os = "windows")]
 fn szperacz_aktualizuj(wersja: &str) -> ResultType<()> {
     use hbb_common::sha2::{Digest, Sha256};
+    use std::io::Read;
+    szperacz_stan("POBIERANIE", 0);
     let adres = "https://szperacz.minitel24.pl/wersja.json";
     let opis: serde_json::Value = create_http_client_with_url_strict(adres)?
         .get(adres)
@@ -121,11 +139,29 @@ fn szperacz_aktualizuj(wersja: &str) -> ResultType<()> {
     if !plik.starts_with("https://szperacz.minitel24.pl/") || suma.len() != 64 {
         bail!("zły opis wersji");
     }
-    let dane = create_http_client_with_url_strict(&plik)?
+    let mut odp = create_http_client_with_url_strict(&plik)?
         .get(&plik)
         .send()?
-        .error_for_status()?
-        .bytes()?;
+        .error_for_status()?;
+    let calosc = odp.content_length().unwrap_or(0);
+    let mut dane: Vec<u8> = Vec::with_capacity(calosc as usize);
+    let mut bufor = vec![0u8; 256 * 1024];
+    let mut ostatni = 0u32;
+    loop {
+        let n = odp.read(&mut bufor)?;
+        if n == 0 {
+            break;
+        }
+        dane.extend_from_slice(&bufor[..n]);
+        if calosc > 0 {
+            let p = (dane.len() as u64 * 100 / calosc) as u32;
+            if p >= ostatni + 5 {
+                ostatni = p;
+                szperacz_stan("POBIERANIE", p);
+            }
+        }
+    }
+    szperacz_stan("SPRAWDZANIE", 100);
     let mut h = Sha256::new();
     h.update(&dane);
     let policzona: String = h.finalize().iter().map(|b| format!("{:02x}", b)).collect();
@@ -137,8 +173,10 @@ fn szperacz_aktualizuj(wersja: &str) -> ResultType<()> {
     if !has_no_active_conns() {
         // W trakcie pobierania ktoś się połączył — spróbuj ponownie po sesji.
         config::Config::set_option("szperacz-aktualizuj".to_owned(), wersja.to_owned());
+        szperacz_stan("CZEKAM", 0);
         return Ok(());
     }
+    szperacz_stan("INSTALACJA", 100); // 439.5
     update_new_version(false, wersja, &sciezka);
     Ok(())
 }
