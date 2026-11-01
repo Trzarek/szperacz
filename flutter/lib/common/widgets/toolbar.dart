@@ -12,6 +12,8 @@ import 'package:flutter_hbb/desktop/widgets/remote_toolbar.dart';
 import 'package:flutter_hbb/models/model.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
+import 'package:flutter_hbb/desktop/pages/szperacz.dart'
+    show szperaczJestSerwisantem, szperaczPrzejmijRdp;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -516,6 +518,19 @@ List<TTextMenu> toolbarControls(BuildContext context, String id, FFI ffi) {
       TTextMenu(
           child: Text('${translate("Insert Ctrl + Alt + Del")}'),
           onPressed: () => bind.sessionCtrlAltDel(sessionId: sessionId)),
+    );
+  }
+  // Szperacz (451.1, 452.2): przejęcie sesji RDP — tylko w trybie serwisanta.
+  if (isDefaultConn &&
+      !ffiModel.viewOnly &&
+      ffiModel.keyboard &&
+      pi.platform == kPeerPlatformWindows &&
+      szperaczJestSerwisantem()) {
+    v.add(
+      TTextMenu(
+          child: Text('PRZEJMIJ SESJĘ RDP'),
+          onPressed: () =>
+              szperaczPrzejmijRdp(sessionId, id, ffi.dialogManager)),
     );
   }
   // restart

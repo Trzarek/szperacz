@@ -1102,6 +1102,29 @@ pub fn is_physical_console_session() -> Option<bool> {
     None
 }
 
+/// Szperacz (451.2): serwer działa w sesji RDP (nie na konsoli) — przenosi tę sesję
+/// na konsolę (`tscon <sesja> /dest:console`). Proces serwera działa jako SYSTEM,
+/// więc hasło nie jest potrzebne. Ok(false) = brak aktywnej sesji RDP.
+pub fn szperacz_przejmij_rdp() -> ResultType<bool> {
+    if is_physical_console_session() != Some(false) {
+        return Ok(false);
+    }
+    let Some(sid) = get_current_process_session_id() else {
+        bail!("brak numeru sesji");
+    };
+    let out = std::process::Command::new("tscon")
+        .args([&sid.to_string(), "/dest:console"])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()?;
+    if !out.status.success() {
+        bail!(
+            "tscon: {}",
+            String::from_utf8_lossy(&out.stderr).trim().to_owned()
+        );
+    }
+    Ok(true)
+}
+
 pub fn get_active_username() -> String {
     // get_active_user will give console username higher priority
     if let Some(name) = get_current_session_username() {

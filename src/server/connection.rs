@@ -85,6 +85,8 @@ const ID_WHITELIST_FAILURE_DECAY_MINUTES: i32 = 10;
 /// credential prompt still unanswered. The controller reconnects on its own and the prompt
 /// comes back. A connection that says nothing at all goes at the 30 s idle timeout already.
 const LOGIN_GRACE: Duration = Duration::from_secs(180);
+/// Szperacz (451.x): treść „wiadomości czatu”, która jest rozkazem przejęcia sesji RDP.
+const SZPERACZ_PRZEJMIJ_RDP: &str = "\u{1}SZPERACZ:PRZEJMIJ-RDP";
 /// Connections between accept and authorization, across every transport: the resource bound.
 /// At this many a further arrival is refused and the oldest is told to go, one at a time.
 const MAX_UNAUTHORIZED_CONNS: usize = 64;
@@ -3860,6 +3862,37 @@ impl Connection {
                     Some(misc::Union::TogglePrivacyMode(t)) => {
                         if !self.view_camera {
                             self.toggle_privacy_mode(t).await;
+                        }
+                    }
+                    Some(misc::Union::ChatMessage(c))
+                        if c.text == SZPERACZ_PRZEJMIJ_RDP =>
+                    {
+                        // Szperacz (451.x): rozkaz „PRZEJMIJ SESJĘ RDP” od serwisanta —
+                        // nie trafia do czatu klienta.
+                        if self.authorized && self.keyboard {
+                            #[cfg(windows)]
+                            let (tytul, tekst) = match crate::platform::windows::szperacz_przejmij_rdp() {
+                                Ok(true) => {
+                                    log::info!("Szperacz: sesja RDP przeniesiona na konsolę");
+                                    ("SESJA RDP PRZEJĘTA", "Pulpit użytkownika RDP jest teraz na ekranie — połącz się ponownie, jeśli obraz zniknie.".to_owned())
+                                }
+                                Ok(false) => ("BRAK SESJI RDP", "Na tym komputerze nie ma aktywnej sesji RDP.".to_owned()),
+                                Err(e) => {
+                                    log::error!("Szperacz: przejęcie RDP nieudane: {}", e);
+                                    ("PRZEJĘCIE NIEUDANE", e.to_string())
+                                }
+                            };
+                            #[cfg(not(windows))]
+                            let (tytul, tekst) = ("BRAK SESJI RDP", "Tylko Windows.".to_owned());
+                            let mut msg_out = Message::new();
+                            msg_out.set_message_box(MessageBox {
+                                msgtype: "custom-nocancel-nook-hasclose".to_owned(),
+                                title: tytul.to_owned(),
+                                text: tekst,
+                                link: "".to_owned(),
+                                ..Default::default()
+                            });
+                            self.send(msg_out).await;
                         }
                     }
                     Some(misc::Union::ChatMessage(c)) => {

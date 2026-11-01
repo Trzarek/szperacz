@@ -2452,6 +2452,52 @@ Future<String?> szperaczSprawdzPin(String pin) async {
   }
 }
 
+/// 452.2: tryb serwisanta (ważne dopuszczenie po PIN-ie).
+bool szperaczJestSerwisantem() {
+  final d = _dopuszczenie();
+  if (d == null) return false;
+  return (d['do'] as int? ?? 0) > DateTime.now().millisecondsSinceEpoch ~/ 1000;
+}
+
+/// 451.2, 451.5, 451.6: pytanie, rozkaz do klienta i wpis do rejestru strażnika.
+Future<void> szperaczPrzejmijRdp(
+    SessionID sessionId, String klient, OverlayDialogManager dm) async {
+  final tak = await dm.show<bool>((setState, close, context) => SzperaczDialog(
+        tytul: 'PRZEJĄĆ SESJĘ RDP?',
+        onEscape: () => close(false),
+        tresc: _opis('Rozłączyć użytkownika RDP na komputerze $klient '
+            'i przenieść jego pulpit na ekran?\n'
+            'Jego programy dalej działają.'),
+        akcje: [
+          Klawisz3D(
+              tekst: 'ANULUJ',
+              ikona: Icons.close_rounded,
+              rodzaj: RodzajKlawisza.ciemny,
+              onTap: () => close(false)),
+          Klawisz3D(
+              tekst: 'PRZEJMIJ',
+              ikona: Icons.login_rounded,
+              rodzaj: RodzajKlawisza.czerwony,
+              onTap: () => close(true)),
+        ],
+      ));
+  if (tak != true) return;
+  bind.sessionSendChat(
+      sessionId: sessionId, text: '\u0001SZPERACZ:PRZEJMIJ-RDP');
+  final d = _dopuszczenie();
+  if (d != null) {
+    // Okno połączenia to osobne okno — numer bierzemy z rdzenia, nie z serverModel.
+    final mojeId = (await bind.mainGetMyId()).replaceAll(' ', '');
+    _zapytaj('zdarzenie', {
+      'komputer': mojeId,
+      'token': d['token'],
+      'do': d['do'],
+      'klient': klient,
+      'typ': 'przejecie-rdp',
+    });
+  }
+}
+
 /// Wpis połączenia do rejestru na serwerze (202.2); serwer może zgłosić blokadę (204.1).
 Future<void> _zglosPolaczenie(String klient) async {
   final d = _dopuszczenie();
