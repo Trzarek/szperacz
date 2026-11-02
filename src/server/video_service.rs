@@ -647,6 +647,13 @@ fn run(vs: VideoService) -> ResultType<()> {
         log::info!("disable dxgi with option, fall back to gdi");
         c.set_gdi();
     }
+    // Szperacz (482.2): w sesji RDP DirectX bierze obraz z fizycznego monitora (ekran blokady),
+    // a mysz i klawiatura trafiają do sesji RDP — obraz trzeba brać z tej sesji (GDI).
+    #[cfg(windows)]
+    if !c.is_gdi() && crate::platform::is_physical_console_session() == Some(false) {
+        log::info!("Szperacz: sesja RDP, obraz przez GDI");
+        c.set_gdi();
+    }
     let mut video_qos = VIDEO_QOS.lock().unwrap();
     let mut spf = video_qos.spf();
     let mut quality = video_qos.ratio();
