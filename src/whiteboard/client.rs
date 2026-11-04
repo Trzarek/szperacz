@@ -65,9 +65,11 @@ pub fn unregister_whiteboard(k: String) {
     let is_conns_empty = conns.is_empty();
     drop(conns);
 
-    TX_WHITEBOARD.read().unwrap().as_ref().map(|tx| {
-        allow_err!(tx.send((k, CustomEvent::Clear)));
-    });
+    if let Ok(tx) = TX_WHITEBOARD.try_read() {
+        tx.as_ref().map(|tx| {
+            allow_err!(tx.send((k, CustomEvent::Clear)));
+        });
+    }
     if is_conns_empty {
         std::thread::spawn(|| {
             let mut whiteboard = TX_WHITEBOARD.write().unwrap();
@@ -128,25 +130,35 @@ fn tx_send_event(conn: &mut Conn, k: String, event: CustomEvent) {
         }
     }
 
-    TX_WHITEBOARD.read().unwrap().as_ref().map(|tx| {
-        allow_err!(tx.send((k, event)));
-    });
+    // Szperacz (487.1): wątek wejścia nigdy nie czeka na rysowanie kursora; gdy nakładka dopiero
+    // startuje (trzyma blokadę), ten ruch kursora po prostu przepada.
+    if let Ok(tx) = TX_WHITEBOARD.try_read() {
+        tx.as_ref().map(|tx| {
+            allow_err!(tx.send((k, event)));
+        });
+    }
 }
 
 #[tokio::main(flavor = "current_thread")]
 async fn start_whiteboard_() -> ResultType<()> {
+    // Szperacz (487.1): na ekranie logowania czekamy BEZ blokady TX_WHITEBOARD. Dawniej ta pętla
+    // trzymała blokadę do zapisu, a kursor serwisanta (zawsze włączony, 134.2, 180.1) czekał na
+    // odczyt: po kilku ruchach myszy stawał cały wątek wejścia — mysz, klawiatura, Ctrl+Alt+Del.
+    loop {
+        if !crate::platform::is_prelogin() {
+            break;
+        }
+        sleep(1.).await;
+        if CONNS.read().unwrap().is_empty() {
+            return Ok(());
+        }
+    }
     let mut tx_whiteboard = TX_WHITEBOARD.write().unwrap();
     if tx_whiteboard.is_some() {
         log::warn!("Whiteboard already started");
         return Ok(());
     }
 
-    loop {
-        if !crate::platform::is_prelogin() {
-            break;
-        }
-        sleep(1.).await;
-    }
     let mut stream = None;
     if let Ok(s) = ipc::connect(1000, "_whiteboard").await {
         stream = Some(s);

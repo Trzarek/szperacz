@@ -2270,6 +2270,12 @@ impl Connection {
     ) {
         let sessions = crate::platform::get_available_sessions(true);
         if let Some(current_sid) = crate::platform::get_current_process_session_id() {
+            // Szperacz (487.2): serwer jest w sesji RDP, a na konsoli nikt nie jest zalogowany —
+            // nie pytamy o sesję. Domyślnie zaznaczona „Console” to tylko ekran logowania, a jej
+            // wybór przenosił serwer z pulpitu RDP na ten ekran.
+            if crate::platform::windows::szperacz_rdp_przy_pustej_konsoli(current_sid) {
+                return;
+            }
             if crate::platform::is_installed()
                 && crate::platform::is_share_rdp()
                 && raii::AuthedConnID::non_port_forward_conn_count() == 1

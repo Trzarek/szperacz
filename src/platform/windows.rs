@@ -1102,6 +1102,12 @@ pub fn is_physical_console_session() -> Option<bool> {
     None
 }
 
+/// Szperacz (487.2): `current_sid` to sesja RDP, a na konsoli nikt nie jest zalogowany.
+pub fn szperacz_rdp_przy_pustej_konsoli(current_sid: u32) -> bool {
+    let konsola = unsafe { get_current_session(FALSE) };
+    konsola != u32::MAX && konsola != current_sid && get_session_username(konsola).is_empty()
+}
+
 /// Szperacz (451.2): serwer działa w sesji RDP (nie na konsoli) — przenosi tę sesję
 /// na konsolę (`tscon <sesja> /dest:console`). Proces serwera działa jako SYSTEM,
 /// więc hasło nie jest potrzebne. Ok(false) = brak aktywnej sesji RDP.
